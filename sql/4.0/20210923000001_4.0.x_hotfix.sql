@@ -1,0 +1,2 @@
+ALTER TABLE `schedule_engine_job_checkpoint` DROP INDEX `taskid_checkpoint`;
+ALTER TABLE `schedule_engine_job_checkpoint` ADD UNIQUE KEY `taskid_checkpoint` (`task_id`,`task_engine_id`,`checkpoint_id`) COMMENT 'taskid和checkpoint组成的唯一索引';	

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineTaskDao">
+
+    <sql id="Base_Column_List">
+        `id`,`name`,`tenant_id`,`project_id`,`app_type`,`owner_user_id`,`early_warn_margin`,`batch_type`,`open_status`,`priority`,`gmt_create`,`gmt_modified`,`is_deleted`
+    </sql>
+
+    <select id="countByModel" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM baseline_task
+        WHERE `is_deleted` = 0
+        <if test="model.baselineName !=null" >
+            AND `name` like  concat('%', #{model.baselineName}, '%')
+        </if>
+        <if test="model.ownerUserId!=null" >
+            ANd `owner_user_id` = #{model.ownerUserId}
+        </if>
+        <if test="model.projectId !=null" >
+            AND `project_id` = #{model.projectId}
+        </if>
+        <if test="model.tenantId!=null" >
+            AND `tenant_id` = #{model.tenantId}
+        </if>
+        <if test="model.batchType !=null">
+            AND `batch_type` = #{model.batchType}
+        </if>
+        <if test="model.priorityList!=null and model.priorityList.size !=0">
+            AND `priority` IN
+            <foreach collection="model.priorityList" open="(" close=")" item="priority" separator="," >
+                #{priority}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectByModel" resultType="com.dtstack.engine.po.BaselineTask">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM baseline_task
+        WHERE `is_deleted` = 0
+        <if test="model.baselineName !=null" >
+            AND `name` like  concat('%', #{model.baselineName}, '%')
+        </if>
+        <if test="model.ownerUserId!=null" >
+            ANd `owner_user_id` = #{model.ownerUserId}
+        </if>
+        <if test="model.projectId !=null" >
+            AND `project_id` = #{model.projectId}
+        </if>
+        <if test="model.tenantId!=null" >
+            ANd `tenant_id` = #{model.tenantId}
+        </if>
+        <if test="model.batchType !=null">
+            AND `batch_type` = #{model.batchType}
+        </if>
+        <if test="model.priorityList!=null and model.priorityList.size !=0">
+            AND `priority` IN
+            <foreach collection="model.priorityList" open="(" close=")" item="priority" separator="," >
+                #{priority}
+            </foreach>
+        </if>
+        ORDER BY `gmt_create` DESC
+        LIMIT #{model.start},#{model.pageSize}
+    </select>
+
+    <select id="selectByPrimaryKey" resultType="com.dtstack.engine.po.BaselineTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task
+        where `id` = #{id} AND `is_deleted` = 0
+    </select>
+
+    <select id="selectRangeIdOfLimit" resultType="com.dtstack.engine.po.BaselineTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task
+        where `id` &gt;= #{startId} AND `is_deleted` = 0 and `open_status` = #{openStatus}
+        limit #{limit}
+    </select>
+
+    <select id="selectByIds" resultType="com.dtstack.engine.po.BaselineTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task
+        where `is_deleted` = 0
+        and id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator="," >
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectByName" resultType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task
+        where `is_deleted` = 0
+        and `name` = #{name}
+        and `project_id` = #{projectId}
+    </select>
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.BaselineTask" useGeneratedKeys="true" keyProperty="id">
+        insert into baseline_task (`id`, `name`,`tenant_id`,`project_id`, `app_type`,
+        `owner_user_id`, `early_warn_margin`,`batch_type`,
+        `open_status`,`priority`, `is_deleted`)
+        values (#{id}, #{name}, #{tenantId},#{projectId}, #{appType},
+        #{ownerUserId}, #{earlyWarnMargin},#{batchType},
+        #{openStatus},#{priority}, #{isDeleted})
+    </insert>
+
+    <update id="updateByPrimaryKeySelective">
+        update baseline_task
+        <set>
+            <if test="projectId !=null" >
+                `project_id` = #{projectId},
+            </if>
+            <if test="tenantId != null" >
+                `tenant_id` = #{tenantId},
+            </if>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <if test="appType != null">
+                `app_type` = #{appType},
+            </if>
+            <if test="ownerUserId != null">
+                `owner_user_id` = #{ownerUserId},
+            </if>
+            <if test="earlyWarnMargin != null">
+                `early_warn_margin` = #{earlyWarnMargin},
+            </if>
+            <if test="batchType != null">
+                `batch_type` = #{batchType},
+            </if>
+            <if test="openStatus != null">
+                `open_status` = #{openStatus},
+            </if>
+            <if test="priority != null">
+                `priority` = #{priority},
+            </if>
+            <if test="gmtCreate != null">
+                `gmt_create` = #{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                `gmt_modified` = #{gmtModified},
+            </if>
+            <if test="isDeleted != null">
+                `is_deleted` = #{isDeleted},
+            </if>
+        </set>
+        where `id` = #{id}
+    </update>
+
+    <update id="deleteById">
+        update baseline_task
+        set `is_deleted` = 1
+        where `id` = #{id}
+    </update>
+
+    <update id="deleteBaselineTaskByProjectId">
+        update baseline_task
+        set `is_deleted` = 1
+        where `project_id` = #{projectId} AND `app_type` = #{appType}
+    </update>
+
+    <update id="updateOwnerByOwnerIds">
+        update baseline_task
+        set `owner_user_id` = #{newOwnerUserId}
+        where `is_deleted` = 0
+        and `owner_user_id` IN
+        <foreach collection="oldOwnerUserIds" item="ownerUserId" open="(" close=")" separator="," >
+            #{ownerUserId}
+        </foreach>
+    </update>
+
+    <delete id="deleteByIds">
+        update baseline_task
+        set `is_deleted` = 1
+        where id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator="," >
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

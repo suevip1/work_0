@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dtstack.engine.dao.ConsoleKerberosProjectDao">
+
+    <insert id="insert">
+        insert into console_kerberos_project (`project_id`, `app_type`,
+        `name`, `keytab_name`, `conf_name`, `remote_path`, `principal`,`open_kerberos`,
+        `gmt_create`, `gmt_modified`, `is_deleted`,
+        `task_type_list`)
+        values (#{record.projectId}, #{record.appType},
+        #{record.name}, #{record.keytabName}, #{record.confName},
+        #{record.remotePath}, #{record.principal}, #{record.openKerberos},
+        #{record.gmtCreate}, #{record.gmtModified}, #{record.isDeleted},
+        #{record.taskTypeList});
+    </insert>
+
+    <update id="updateByPrimaryKeySelective">
+        update console_kerberos_project
+        <set>
+            <if test="record.projectId != null">
+                `project_id` = #{record.projectId},
+            </if>
+            <if test="record.appType != null">
+                `app_type` = #{record.appType},
+            </if>
+            <if test="record.name != null">
+                `name` = #{record.name},
+            </if>
+            <if test="record.keytabName != null">
+                `keytab_name` = #{record.keytabName},
+            </if>
+            <if test="record.confName != null">
+                `conf_name` = #{record.confName},
+            </if>
+            <if test="record.remotePath != null">
+                `remote_path` = #{record.remotePath},
+            </if>
+            <if test="record.principal != null">
+                `principal` = #{record.principal},
+            </if>
+            <if test="record.openKerberos != null">
+                `open_kerberos` = #{record.openKerberos},
+            </if>
+            <if test="record.gmtModified != null">
+                `gmt_modified` = #{record.gmtModified},
+            </if>
+            <if test="record.isDeleted != null">
+                `is_deleted` = #{record.isDeleted},
+            </if>
+            <if test="record.taskTypeList != null">
+                `task_type_list` = #{record.taskTypeList},
+            </if>
+        </set>
+        where `id` = #{record.id}
+    </update>
+
+    <select id="selectByProjectId" resultType="com.dtstack.engine.po.ConsoleKerberosProject">
+        select
+            `id`,
+            `project_id`,
+            `app_type`,
+            `name`,
+            `keytab_name`,
+            `conf_name`,
+            `remote_path`,
+            `principal`,
+            `open_kerberos`,
+            `gmt_create`,
+            `gmt_modified`,
+            `is_deleted`,
+            `task_type_list`
+        from console_kerberos_project
+        where
+            `project_id` = #{projectId} and
+            `app_type` = #{appType} and
+            `is_deleted` = 0
+        limit 1
+    </select>
+
+
+</mapper>

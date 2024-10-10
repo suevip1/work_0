@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleFileSyncDetailDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleFileSyncDetail">
+    <!--@mbg.generated-->
+    <!--@Table console_file_sync_detail-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="file_name" jdbcType="VARCHAR" property="fileName" />
+    <result column="is_chosen" jdbcType="TINYINT" property="isChosen" />
+    <result column="last_sync_time" jdbcType="TIMESTAMP" property="lastSyncTime" />
+    <result column="cluster_id" jdbcType="BIGINT" property="clusterId" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, file_name, is_chosen, last_sync_time, cluster_id, gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from console_file_sync_detail
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from console_file_sync_detail
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleFileSyncDetail" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_file_sync_detail (file_name, is_chosen, last_sync_time, 
+      cluster_id, gmt_create, gmt_modified, 
+      is_deleted)
+    values (#{fileName,jdbcType=VARCHAR}, #{isChosen,jdbcType=TINYINT}, #{lastSyncTime,jdbcType=TIMESTAMP}, 
+      #{clusterId,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{isDeleted,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleFileSyncDetail" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_file_sync_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fileName != null">
+        file_name,
+      </if>
+      <if test="isChosen != null">
+        is_chosen,
+      </if>
+      <if test="lastSyncTime != null">
+        last_sync_time,
+      </if>
+      <if test="clusterId != null">
+        cluster_id,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fileName != null">
+        #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="isChosen != null">
+        #{isChosen,jdbcType=TINYINT},
+      </if>
+      <if test="lastSyncTime != null">
+        #{lastSyncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clusterId != null">
+        #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ConsoleFileSyncDetail">
+    <!--@mbg.generated-->
+    update console_file_sync_detail
+    <set>
+      <if test="fileName != null">
+        file_name = #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="isChosen != null">
+        is_chosen = #{isChosen,jdbcType=TINYINT},
+      </if>
+      <if test="lastSyncTime != null">
+        last_sync_time = #{lastSyncTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clusterId != null">
+        cluster_id = #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ConsoleFileSyncDetail">
+    <!--@mbg.generated-->
+    update console_file_sync_detail
+    set file_name = #{fileName,jdbcType=VARCHAR},
+      is_chosen = #{isChosen,jdbcType=TINYINT},
+      last_sync_time = #{lastSyncTime,jdbcType=TIMESTAMP},
+      cluster_id = #{clusterId,jdbcType=BIGINT},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=TINYINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="batchSave" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    insert into console_file_sync_detail
+    (file_name, is_chosen, last_sync_time, cluster_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.fileName,jdbcType=VARCHAR}, #{item.isChosen,jdbcType=TINYINT}, #{item.lastSyncTime,jdbcType=TIMESTAMP}, 
+        #{item.clusterId,jdbcType=BIGINT})
+    </foreach>
+  </insert>
+
+  <delete id="deleteByClusterId">
+    delete from console_file_sync_detail
+    where cluster_id = #{clusterId,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listByClusterId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_file_sync_detail
+    where cluster_id = #{clusterId,jdbcType=BIGINT}
+     and is_deleted = 0
+  </select>
+
+  <select id="listSyncFilesByClusterId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_file_sync_detail
+    where is_chosen = 1 and cluster_id in
+    <foreach collection="clusterIds" item="item" open="(" close=")" separator="," >
+      #{item,jdbcType=BIGINT}
+    </foreach>
+     and is_deleted = 0
+  </select>
+
+  <update id="modifySyncTime">
+    update console_file_sync_detail set last_sync_time = now()
+     where cluster_id = #{clusterId,jdbcType=BIGINT}
+      and file_name in
+        <foreach collection="fileNames" item="item" open="(" close=")" separator="," >
+          #{item,jdbcType=VARCHAR}
+        </foreach>
+  </update>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskProjectParamDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleTaskProjectParam">
+    <!--@mbg.generated-->
+    <!--@Table schedule_task_project_param-->
+    <id column="id" property="id" />
+    <result column="task_id" property="taskId" />
+    <result column="app_type" property="appType" />
+    <result column="project_param_id" property="projectParamId" />
+    <result column="is_deleted" property="isDeleted" />
+    <result column="gmt_create" property="gmtCreate" />
+    <result column="gmt_modified" property="gmtModified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, task_id, app_type, project_param_id, is_deleted, gmt_create, gmt_modified
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from schedule_task_project_param
+    where id = #{id}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--@mbg.generated-->
+    delete from schedule_task_project_param
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleTaskProjectParam" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_task_project_param (task_id, app_type, project_param_id, is_deleted, gmt_create, gmt_modified
+      )
+    values (#{taskId}, #{appType}, #{projectParamId}, #{isDeleted}, #{gmtCreate}, #{gmtModified}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleTaskProjectParam" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_task_project_param
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="appType != null">
+        app_type,
+      </if>
+      <if test="projectParamId != null">
+        project_param_id,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId},
+      </if>
+      <if test="appType != null">
+        #{appType},
+      </if>
+      <if test="projectParamId != null">
+        #{projectParamId},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ScheduleTaskProjectParam">
+    <!--@mbg.generated-->
+    update schedule_task_project_param
+    <set>
+      <if test="taskId != null">
+        task_id = #{taskId},
+      </if>
+      <if test="appType != null">
+        app_type = #{appType},
+      </if>
+      <if test="projectParamId != null">
+        project_param_id = #{projectParamId},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ScheduleTaskProjectParam">
+    <!--@mbg.generated-->
+    update schedule_task_project_param
+    set task_id = #{taskId},
+      app_type = #{appType},
+      project_param_id = #{projectParamId},
+      is_deleted = #{isDeleted},
+      gmt_create = #{gmtCreate},
+      gmt_modified = #{gmtModified}
+    where id = #{id}
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    insert into schedule_task_project_param
+    (task_id, app_type, project_param_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.taskId}, #{item.appType}, #{item.projectParamId})
+    </foreach>
+  </insert>
+
+  <select id="findTaskBindProjectParams" resultMap="BaseResultMap">
+    select
+     <include refid="Base_Column_List" />
+    from schedule_task_project_param
+    where task_id = #{taskId} and app_type = #{appType} and is_deleted = 0
+  </select>
+
+  <select id="distinctExistProjectParamIds" resultType="java.lang.Long">
+    select distinct project_param_id from schedule_task_project_param
+     where project_param_id in
+      <foreach item="projectParamId" index="index" collection="projectParamIds" open="(" separator="," close=")">
+        #{projectParamId}
+      </foreach>
+      and is_deleted = 0
+  </select>
+
+  <select id="findByProjectParamId" resultMap="BaseResultMap">
+    select
+     <include refid="Base_Column_List" />
+    from schedule_task_project_param
+     where project_param_id = #{projectParamId} and is_deleted = 0
+  </select>
+
+  <delete id="removeIdenticalProjectParam">
+    delete from schedule_task_project_param
+     where task_id = #{taskId} and app_type = #{appType}
+      and project_param_id in (
+       select id from schedule_project_param where param_name in
+          <foreach item="paramName" index="index" collection="paramNames" open="(" separator="," close=")">
+            #{paramName}
+          </foreach>
+      )
+  </delete>
+
+  <delete id="removeByTask">
+    delete from schedule_task_project_param
+     where task_id = #{taskId} and app_type = #{appType}
+  </delete>
+
+  <delete id="removeByTasks">
+    delete from schedule_task_project_param
+    where task_id in
+      <foreach item="taskId" index="index" collection="taskIds" open="(" separator="," close=")">
+        #{taskId}
+      </foreach>
+    and app_type = #{appType}
+  </delete>
+</mapper>

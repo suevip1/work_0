@@ -1,0 +1,1 @@
+alter table console_kerberos modify principal varchar(255) not null comment 'principal';

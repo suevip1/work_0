@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobChainOutputParamDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleJobChainOutputParam">
+    <!--@mbg.generated-->
+    <!--@Table schedule_job_chain_output_param-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="job_id" jdbcType="VARCHAR" property="jobId" />
+    <result column="job_type" jdbcType="TINYINT" property="jobType" />
+    <result column="task_id" jdbcType="INTEGER" property="taskId" />
+    <result column="app_type" jdbcType="INTEGER" property="appType" />
+    <result column="task_type" jdbcType="TINYINT" property="taskType" />
+    <result column="param_name" jdbcType="VARCHAR" property="paramName" />
+    <result column="output_param_type" jdbcType="TINYINT" property="outputParamType" />
+    <result column="param_command" jdbcType="VARCHAR" property="paramCommand" />
+    <result column="param_value" jdbcType="LONGVARCHAR" property="paramValue" />
+    <result column="parsed_param_command" jdbcType="VARCHAR" property="parsedParamCommand" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, job_id, job_type, task_id, app_type, task_type, param_name, output_param_type, 
+    param_command, param_value, parsed_param_command, gmt_create, gmt_modified
+  </sql>
+
+  <sql id="Base_Column_List_Without_ParamValue">
+    id, job_id, job_type, task_id, app_type, task_type, param_name, output_param_type,
+    param_command, parsed_param_command, gmt_create, gmt_modified
+  </sql>
+
+  <insert id="batchSave" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    insert into schedule_job_chain_output_param
+    (job_id, job_type, task_id, app_type, task_type, param_name, output_param_type, param_command, parsed_param_command,
+      param_value)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.jobId,jdbcType=VARCHAR}, #{item.jobType,jdbcType=TINYINT}, #{item.taskId,jdbcType=INTEGER},
+        #{item.appType,jdbcType=INTEGER}, #{item.taskType,jdbcType=TINYINT}, #{item.paramName,jdbcType=VARCHAR},
+        #{item.outputParamType,jdbcType=TINYINT}, #{item.paramCommand,jdbcType=VARCHAR}, #{item.parsedParamCommand,jdbcType=VARCHAR},
+        #{item.paramValue}
+        )
+    </foreach>
+  </insert>
+
+  <delete id="deleteOutputParamsByTask">
+    delete
+    from schedule_job_chain_output_param
+    where task_id = #{taskId} and app_type = #{appType} and job_type = #{jobType}
+  </delete>
+
+  <select id="listOutputParamsByTask" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_job_chain_output_param
+    where task_id = #{taskId} and app_type = #{appType} and job_type = #{jobType}
+  </select>
+
+  <select id="getTempJobOutputParam" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+     from schedule_job_chain_output_param
+    where task_id = #{taskId} and app_type = #{appType} and param_name = #{paramName} and job_type = 2
+  </select>
+
+  <select id="getJobOutputParam" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_job_chain_output_param
+    where job_id = #{jobId} and param_name = #{paramName}
+  </select>
+
+  <delete id="deleteByJobId">
+    delete from schedule_job_chain_output_param where job_id = #{jobId}
+  </delete>
+
+  <select id="listByOutputParamType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_job_chain_output_param
+    where job_id = #{jobId} and output_param_type = #{outputParamType}
+  </select>
+
+  <select id="listByJobId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_job_chain_output_param
+    where job_id = #{jobId}
+  </select>
+
+  <select id="listTempJobOutputParamsByThreshold" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_job_chain_output_param
+    where gmt_create &lt; date_add(now(), interval -#{retainInDay} DAY) and job_type = 2
+  </select>
+
+  <select id="listTempJobOutputParamIdsByThreshold" resultType="java.lang.Integer">
+    select id from schedule_job_chain_output_param
+    where gmt_create &lt; date_add(now(), interval -#{retainInDay} DAY) and job_type in (2, 4)
+  </select>
+
+  <select id="listCleanJobOutputParamsById" resultMap="BaseResultMap">
+    select
+       <!--rdb 任务不查 param_value，防止结果集过大-->
+       (case when task_type in
+          <foreach collection="rdbTaskTypes" separator="," index="index" item="item" open="(" close=")">
+            ${item}
+          </foreach>
+        then null else param_value end) as param_value,
+      <include refid="Base_Column_List_Without_ParamValue" />
+     from schedule_job_chain_output_param where id in
+    <foreach collection="ids" separator="," index="index" item="item" open="(" close=")">
+      ${item}
+    </foreach>
+  </select>
+
+  <delete id="deleleBatchByIds">
+    delete from schedule_job_chain_output_param where id in
+    <foreach collection="ids" separator="," index="index" item="item" open="(" close=")">
+      ${item}
+    </foreach>
+  </delete>
+
+  <update id="modifyParamValue">
+    update schedule_job_chain_output_param set param_value = #{paramValue}
+     where job_id = #{jobId,jdbcType=VARCHAR} and param_name = #{paramName,jdbcType=VARCHAR}
+  </update>
+
+  <select id="queryIdRange" resultType="com.dtstack.engine.dto.IdRangeDTO">
+     select min(id) as startId, max(id) as endId from schedule_job_chain_output_param
+      <include refid="whereSqlFragment"/>
+  </select>
+
+  <select id="queryCountByCondition" resultType="long">
+    select count(*) from schedule_job_chain_output_param
+     <include refid="whereSqlFragment"/>
+  </select>
+
+  <select id="queryByCondition" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_job_chain_output_param
+    <include refid="whereSqlFragment"/>
+  </select>
+
+  <delete id="deleteByCondition">
+    delete from schedule_job_chain_output_param
+    <include refid="whereSqlFragment"/>
+  </delete>
+
+  <sql id="whereSqlFragment">
+    <where>
+      <choose>
+        <when test="whereSql != null and whereSql != ''">
+          ${whereSql}
+        </when>
+        <otherwise>
+           <!--避免恶意 sql-->
+           and 1 = 0
+        </otherwise>
+      </choose>
+    </where>
+  </sql>
+</mapper>

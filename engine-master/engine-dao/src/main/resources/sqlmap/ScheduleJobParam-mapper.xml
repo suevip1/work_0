@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobParamDao">
+
+    <sql id="select_content_fragment">
+        id, job_id, param_name, param_value, param_desc, param_type, gmt_create, gmt_modified, is_deleted
+    </sql>
+
+    <insert id="insertBatch">
+        insert ignore into
+        schedule_job_param
+        (job_id, param_name, param_value, param_desc, param_type)
+        values
+        <foreach collection="scheduleJobParams" item="scheduleJobParam" separator=",">
+            (#{scheduleJobParam.jobId},#{scheduleJobParam.paramName},#{scheduleJobParam.paramValue},#{scheduleJobParam.paramDesc},#{scheduleJobParam.paramType})
+        </foreach>
+    </insert>
+
+    <update id="deleteByJobId">
+        delete from schedule_job_param where job_id = #{jobId}
+    </update>
+
+    <select id="selectByJobId" resultType="com.dtstack.engine.po.ScheduleJobParam">
+        select
+        <include refid="select_content_fragment"/>
+        from schedule_job_param where job_id = #{jobId}
+    </select>
+</mapper>

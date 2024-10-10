@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskCalenderDao">
+
+    <insert id="insertBatch">
+        insert into
+        schedule_task_calender(task_id,app_type,calender_id,expand_time,candler_batch_type)
+        values
+        <foreach collection="scheduleTaskCalenders" item="time" separator=",">
+           (#{time.taskId},#{time.appType},#{time.calenderId},#{time.expandTime},#{time.candlerBatchType})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByTaskIds">
+        delete from
+            schedule_task_calender where task_id IN
+        <foreach collection="taskIds" item="taskId"  open="(" separator="," close=")">
+            #{taskId}
+        </foreach>
+        and app_type = #{appType}
+    </delete>
+
+
+    <select id="getTaskByCalenderId" resultType="com.dtstack.engine.dto.CalenderTaskDTO">
+        select substring_index(group_concat(sts.name),',',3) as concatTaskNames,tc.calender_id
+        from schedule_task_calender tc
+        left join schedule_task_shade sts
+        on tc.app_type = sts.app_type
+        and tc.task_id = sts.task_id
+        where calender_id IN
+        <foreach collection="calenderIds" item="calenderId"  open="(" separator="," close=")">
+            #{calenderId}
+        </foreach>
+        group by calender_id
+    </select>
+
+    <select id="getAllTaskByCalenderId" resultType="java.lang.Long">
+        select task_id
+        from schedule_task_calender tc
+        where calender_id IN
+        <foreach collection="calenderIds" item="calenderId"  open="(" separator="," close=")">
+            #{calenderId}
+        </foreach>
+        and tc.app_type = #{appType}
+    </select>
+
+    <select id="findByTaskId" resultType="com.dtstack.engine.po.ScheduleTaskCalender">
+        select * from schedule_task_calender where  task_id = #{taskId} and app_type = #{appType}
+    </select>
+
+    <select id="findByTaskIds" resultType="com.dtstack.engine.po.ScheduleTaskCalender">
+        select * from schedule_task_calender where  task_id in
+            (
+            <foreach collection="taskIds" item="taskId" separator=",">
+                #{taskId}
+            </foreach>
+            )
+            and app_type = #{appType}
+    </select>
+
+
+    <select id="pageQuery" resultType="com.dtstack.engine.dto.CalenderTaskDTO">
+        select sts.task_id
+             , sts.name as taskName
+             , sts.dtuic_tenant_id as tenantId
+             , sts.owner_user_id
+             , sts.project_id
+             , sts.app_type
+
+        from schedule_task_calender tc
+                 left join schedule_task_shade sts on tc.task_id = sts.task_id and tc.app_type = sts.app_type
+
+        where calender_id = #{model.calenderId}
+        limit #{start}, #{pageSize}
+    </select>
+
+    <select id="findTotalTasks" resultType="java.lang.Integer">
+        select count(1) from schedule_task_calender where  calender_id = #{calenderId}
+    </select>
+
+
+    <select id="getCalenderByTasks" resultType="com.dtstack.engine.dto.CalenderTaskDTO">
+        select stc.task_id,stc.app_type,cc.calender_name,stc.calender_id
+               from schedule_task_calender  stc
+              left join console_calender cc on stc.calender_id = cc.id
+        where cc.is_deleted = 0 and stc.is_deleted = 0 and stc.task_id IN
+        <foreach collection="taskIds" item="taskId"  open="(" separator="," close=")">
+            #{taskId}
+        </foreach>
+        and app_type = #{appType}
+    </select>
+</mapper>

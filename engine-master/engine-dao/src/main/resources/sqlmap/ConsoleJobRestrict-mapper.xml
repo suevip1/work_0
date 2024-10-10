@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleJobRestrictDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleJobRestrict">
+    <!--@Table console_job_restrict-->
+    <id column="id" property="id" />
+    <result column="restrict_start_time" property="restrictStartTime" />
+    <result column="restrict_end_time" property="restrictEndTime" />
+    <result column="effective_time" property="effectiveTime" />
+    <result column="status" property="status" />
+    <result column="gmt_create" property="gmtCreate" />
+    <result column="gmt_modified" property="gmtModified" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="is_deleted" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, restrict_start_time, restrict_end_time, effective_time, `status`, gmt_create,
+    gmt_modified, create_user_id, is_deleted
+  </sql>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_job_restrict
+    where id = #{id} and is_deleted = 0
+  </select>
+
+  <insert id="add" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleJobRestrict" useGeneratedKeys="true">
+    insert into console_job_restrict (restrict_start_time, restrict_end_time, `status`, create_user_id)
+     values (#{record.restrictStartTime}, #{record.restrictEndTime}, #{record.status}, #{record.createUserId})
+  </insert>
+
+  <update id="changeStatus">
+    update console_job_restrict set `status` = #{toStatus}
+     where id in
+      <foreach collection="ids" item="each" separator="," open="(" close=")">
+        #{each}
+      </foreach>
+      and `status` in
+      <foreach collection="fromStatus" item="each" separator="," open="(" close=")">
+       #{each}
+      </foreach>
+      and is_deleted = 0
+  </update>
+
+  <select id="generalCount" resultType="int">
+    SELECT COUNT(1)
+     FROM console_job_restrict
+    WHERE is_deleted = 0
+    <include refid="pageWhere"/>
+  </select>
+
+  <select id="generalQuery" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from console_job_restrict
+    WHERE is_deleted = 0
+    <include refid="pageWhere"/>
+    <if test="orderBy != null and sort != null">
+      order by ${orderBy} ${sort}
+    </if>
+    <if test="start != null and pageSize != null">
+      limit #{start}, #{pageSize}
+    </if>
+    <if test="start == null and pageSize != null">
+      limit #{pageSize}
+    </if>
+  </select>
+
+  <sql id="pageWhere">
+    <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(model.status)">
+      AND `status` in
+      <foreach collection="model.status" item="each" separator="," open="(" close=")">
+        #{each}
+      </foreach>
+    </if>
+    <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(model.isEffective)">
+      <choose>
+        <when test="model.isEffective.containsAll(@com.google.common.collect.Lists@newArrayList(0, 1))">
+        </when>
+        <when test="model.isEffective.contains(0)">
+          and effective_time is null
+        </when>
+        <when test="model.isEffective.contains(1)">
+          and effective_time is not null
+        </when>
+        <otherwise>
+          and 1 = 0
+        </otherwise>
+      </choose>
+    </if>
+  </sql>
+
+  <update id="close">
+    <!--小于等于「计划结束时间」的开启的规则-->
+    update console_job_restrict set `status` = 2 where id = #{id} and `status`
+     in (0, 1) and #{now} <![CDATA[<=]]> restrict_end_time
+  </update>
+
+  <update id="remove">
+    <!--「无效」和没有实际生效的「关闭」状态-->
+    update console_job_restrict set is_deleted = 1 where id = #{id} and
+     (`status` = 3 or (`status` = 2 and effective_time is null))
+  </update>
+
+  <update id="open">
+    <!--处于「关闭」状态的「计划结束时间」之前的规则-->
+    update console_job_restrict set
+     `status` = case when effective_time is null then 0 else 1 end
+    <!--秒级场景下，忽略 now 等于 restrict_end_time 的场景-->
+    where id = #{id} and `status` = 2 and #{now} <![CDATA[<]]> restrict_end_time
+  </update>
+
+  <update id="changeOverEndTimeStatusByIdsAndNow">
+    <include refid="updateOverEndTimeStatusByIdsSql"/>
+     and #{now} <![CDATA[>=]]> restrict_end_time
+  </update>
+
+  <update id="changeOverEndTimeStatusByIds">
+    <include refid="updateOverEndTimeStatusByIdsSql"/>
+  </update>
+
+  <sql id="updateOverEndTimeStatusByIdsSql">
+    update console_job_restrict
+    set `status` = case when effective_time is null then 3 else 4 end
+    where is_deleted = 0
+    and `status` not in (3, 4)
+    and id in
+    <foreach collection="ids" item="each" separator="," open="(" close=")">
+      #{each}
+    </foreach>
+  </sql>
+
+  <select id="listAllOverEndTimeRecords" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from console_job_restrict
+    WHERE is_deleted = 0 and #{now} <![CDATA[>=]]> restrict_end_time and is_deleted = 0
+  </select>
+
+  <select id="listToOverEndTimeRecords" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from console_job_restrict
+    WHERE is_deleted = 0 and #{now} <![CDATA[<=]]> restrict_end_time
+     and `status` not in (3, 4)
+     and is_deleted = 0
+  </select>
+
+  <select id="listByStatus" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from console_job_restrict
+    WHERE `status` in
+    <foreach collection="status" item="each" separator="," open="(" close=")">
+      #{each}
+    </foreach>
+    and is_deleted = 0
+  </select>
+
+  <select id="findLatestWaitAndRunRestrict" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List" />
+      from console_job_restrict
+    where (#{now} <![CDATA[>]]> restrict_start_time and #{now} <![CDATA[<]]> restrict_end_time)
+      and `status` in (0, 1) and is_deleted = 0
+    order by restrict_start_time
+      limit 1
+  </select>
+
+  <update id="updateEffectiveTime">
+    update console_job_restrict set
+    `status` = 1,
+    effective_time = #{now}
+      where id = #{id} and `status` = 0 and effective_time is null
+  </update>
+
+  <select id="existWaitOrRunning" resultType="java.lang.Boolean">
+    select 1 from console_job_restrict
+     WHERE `status` in (0, 1)
+    and is_deleted = 0 limit 1
+  </select>
+</mapper>

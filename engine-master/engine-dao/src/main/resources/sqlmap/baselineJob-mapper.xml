@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineJobDao">
+
+    <sql id="Base_Column_List">
+        `id`, `name`,`tenant_id`,`project_id`, `baseline_task_id`, `app_type`, `owner_user_id`, `baseline_status`,
+        `finish_status`, `business_date`, `expect_finish_time`,`finish_time`,`batch_type`,`cyc_time`,`gmt_create`, `gmt_modified`,
+        `is_deleted`
+    </sql>
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.BaselineJob" useGeneratedKeys="true" keyProperty="id">
+        insert into baseline_job ( `name`, `tenant_id`,`project_id`,`baseline_task_id`,
+        `app_type`, `owner_user_id`, `baseline_status`,
+        `finish_status`, `business_date`, `expect_finish_time`,`batch_type`, `cyc_time`,`is_deleted`
+        )
+        values (#{name},#{tenantId},#{projectId},#{baselineTaskId},
+        #{appType}, #{ownerUserId}, #{baselineStatus},
+        #{finishStatus}, #{businessDate}, #{expectFinishTime} ,#{batchType},#{cycTime}, #{isDeleted}
+        )
+    </insert>
+    <delete id="deleteByIds">
+        DELETE FROM `baseline_job`
+        WHERE `is_deleted` = 0
+        AND `id` IN
+        <foreach collection="ids" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="scanningBaselineJobById" resultType="com.dtstack.engine.po.BaselineJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM `baseline_job`
+        WHERE `is_deleted` = 0
+        AND `business_date` &gt;= #{businessDate}
+        <if test="startId!=null">
+            AND `id` &gt; #{startId}
+        </if>
+        <if test="baselineStatues!=null and baselineStatues.size !=0">
+            AND `baseline_status` IN
+            <foreach collection="baselineStatues" separator="," close=")" open="(" item="status">
+                #{status}
+            </foreach>
+        </if>
+        <if test="finishStatus!=null">
+            AND `finish_status` = #{finishStatus}
+        </if>
+        ORDER BY `id`
+        LIMIT ${limit}
+    </select>
+
+    <select id="countByModel" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM `baseline_job`
+        WHERE
+        `is_deleted` = 0
+        <if test="model.baselineName !=null" >
+            AND (
+            `name` like  concat('%', #{model.baselineName}, '%')
+             OR
+            `id` like  concat('%', #{model.baselineName}, '%')
+            )
+        </if>
+        <if test="model.ownerUserId!=null" >
+            AND `owner_user_id` = #{model.ownerUserId}
+        </if>
+        <if test="model.startBusinessTime !=null and model.endBusinessTime!=null">
+            AND `business_date` &gt;= #{model.startBusinessTime}
+            AND `business_date` &lt;= #{model.endBusinessTime}
+        </if>
+        <if test="model.projectId !=null" >
+            AND `project_id` = #{model.projectId}
+        </if>
+        <if test="model.tenantId!=null" >
+            AND `tenant_id` = #{model.tenantId}
+        </if>
+        <if test="model.batchType!=null">
+            AND `batch_type` = #{model.batchType}
+        </if>
+        <if test="model.baselineStatusList !=null and model.baselineStatusList.size > 0">
+            AND `baseline_status` IN
+            <foreach collection="model.baselineStatusList" open="(" close=")" item="baselineStatus" separator=",">
+                #{baselineStatus}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectByModel" resultType="com.dtstack.engine.po.BaselineJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM `baseline_job`
+        WHERE
+        `is_deleted` = 0
+        <if test="model.baselineName !=null" >
+            AND (
+            `name` like  concat('%', #{model.baselineName}, '%')
+            OR
+            `id` like  concat('%', #{model.baselineName}, '%')
+            )
+        </if>
+        <if test="model.ownerUserId!=null" >
+            AND `owner_user_id` = #{model.ownerUserId}
+        </if>
+        <if test="model.startBusinessTime !=null and model.endBusinessTime!=null">
+            AND `business_date` &gt;= #{model.startBusinessTime}
+            AND `business_date` &lt;= #{model.endBusinessTime}
+        </if>
+        <if test="model.projectId !=null" >
+            AND `project_id` = #{model.projectId}
+        </if>
+        <if test="model.tenantId!=null" >
+            ANd `tenant_id` = #{model.tenantId}
+        </if>
+        <if test="model.batchType!=null">
+            AND `batch_type` = #{model.batchType}
+        </if>
+        <if test="model.baselineStatusList !=null and model.baselineStatusList.size > 0">
+            AND `baseline_status` IN
+            <foreach collection="model.baselineStatusList" open="(" close=")" item="baselineStatus" separator=",">
+                #{baselineStatus}
+            </foreach>
+        </if>
+        ORDER BY `gmt_create` DESC
+        LIMIT #{model.start},#{model.pageSize}
+    </select>
+
+    <select id="selectBaselineJobGraph" resultType="com.dtstack.engine.po.BaselineView">
+        SELECT
+           `id`, `business_date`, `expect_finish_time`,`finish_time`,`cyc_time`
+        FROM `baseline_job`
+        WHERE `baseline_task_id` = #{baselineTaskId}
+        AND `business_date` > #{time}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="selectByBusinessDate" resultType="com.dtstack.engine.po.BaselineJob">
+        SELECT
+        `id`
+        FROM `baseline_job`
+        WHERE `baseline_task_id` = #{baselineTaskId}
+        AND `business_date` = #{timestamp}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="selectByIds" resultType="com.dtstack.engine.po.BaselineJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM `baseline_job`
+        WHERE `is_deleted` = 0
+        AND `id` IN
+        <foreach collection="ids" open="(" close=")" item="id" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="updateFinishStatus">
+        UPDATE `baseline_job` SET
+        `finish_status` = #{finishStatus}
+        , `baseline_status` = #{baselineStatus}
+        <if test="finishTime != null">
+            , `finish_time` = #{finishTime}
+        </if>
+        WHERE `id` = #{id}
+    </update>
+
+</mapper>

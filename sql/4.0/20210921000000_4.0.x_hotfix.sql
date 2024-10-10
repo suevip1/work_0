@@ -1,0 +1,1 @@
+ALTER TABLE `console_dtuic_tenant` ADD UNIQUE (`dt_uic_tenant_id`,`is_deleted`);

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobAuthDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleJobAuth">
+    <!--@mbg.generated-->
+    <!--@Table schedule_job_auth-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="uic_user_id" jdbcType="BIGINT" property="uicUserId" />
+    <result column="dtuic_tenant_id" jdbcType="BIGINT" property="dtuicTenantId" />
+    <result column="auth_type" jdbcType="VARCHAR" property="authType" />
+    <result column="auth_biz_name" jdbcType="VARCHAR" property="authBizName" />
+    <result column="submit_user_name" jdbcType="VARCHAR" property="submitUserName" />
+    <result column="auth_info" jdbcType="LONGVARCHAR" property="authInfo" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, uic_user_id, dtuic_tenant_id, auth_type, auth_biz_name, submit_user_name, auth_info, 
+    gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_job_auth
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteById" parameterType="java.lang.Long">
+    delete from schedule_job_auth
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insertIgnore" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleJobAuth" useGeneratedKeys="true">
+    insert ignore into schedule_job_auth (uic_user_id, dtuic_tenant_id, auth_type,
+      auth_biz_name, submit_user_name, auth_info
+      )
+    values (#{uicUserId,jdbcType=BIGINT}, #{dtuicTenantId,jdbcType=BIGINT}, #{authType,jdbcType=VARCHAR}, 
+      #{authBizName,jdbcType=VARCHAR}, #{submitUserName,jdbcType=VARCHAR}, #{authInfo,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+
+  <select id="findByUnikey" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from schedule_job_auth
+    where uic_user_id = #{uicUserId}
+      and dtuic_tenant_id = #{dtuicTenantId}
+      and auth_type = #{authType}
+      and auth_biz_name = #{authBizName}
+      and is_deleted = 0
+  </select>
+
+  <update id="updateByUniKey">
+    update schedule_job_auth
+    set submit_user_name = #{submitUserName},
+        auth_info        = #{authInfo},
+        gmt_modified = now()
+    where uic_user_id = #{uicUserId}
+      and dtuic_tenant_id = #{dtuicTenantId}
+      and auth_type = #{authType}
+      and auth_biz_name = #{authBizName}
+      and is_deleted = 0
+  </update>
+</mapper>

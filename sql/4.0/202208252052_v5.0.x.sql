@@ -1,0 +1,2 @@
+-- DataClearSchedule 使用到了 gmt_modified 字段, 而 console_security_log 的 gmt_modified 在 5.0 版本不存在，如放开将导致异常
+DELETE FROM `schedule_dict` WHERE dict_code = 'data_clear_name' and dict_name = 'console_security_log';

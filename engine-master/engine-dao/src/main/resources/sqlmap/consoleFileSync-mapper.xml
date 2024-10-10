@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleFileSyncDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleFileSync">
+    <!--@mbg.generated-->
+    <!--@Table console_file_sync-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="cluster_id" jdbcType="BIGINT" property="clusterId" />
+    <result column="sync_path" jdbcType="VARCHAR" property="syncPath" />
+    <result column="is_sync" jdbcType="TINYINT" property="isSync" />
+    <result column="last_sync_md5" jdbcType="VARCHAR" property="lastSyncMd5" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, cluster_id, sync_path, is_sync, last_sync_md5, gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from console_file_sync
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from console_file_sync
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleFileSync" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_file_sync (cluster_id, sync_path, is_sync, 
+      last_sync_md5, gmt_create, gmt_modified, 
+      is_deleted)
+    values (#{clusterId,jdbcType=BIGINT}, #{syncPath,jdbcType=VARCHAR}, #{isSync,jdbcType=TINYINT}, 
+      #{lastSyncMd5,jdbcType=VARCHAR}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{isDeleted,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleFileSync" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_file_sync
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        cluster_id,
+      </if>
+      <if test="syncPath != null">
+        sync_path,
+      </if>
+      <if test="isSync != null">
+        is_sync,
+      </if>
+      <if test="lastSyncMd5 != null">
+        last_sync_md5,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="syncPath != null">
+        #{syncPath,jdbcType=VARCHAR},
+      </if>
+      <if test="isSync != null">
+        #{isSync,jdbcType=TINYINT},
+      </if>
+      <if test="lastSyncMd5 != null">
+        #{lastSyncMd5,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ConsoleFileSync">
+    <!--@mbg.generated-->
+    update console_file_sync
+    <set>
+      <if test="clusterId != null">
+        cluster_id = #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="syncPath != null">
+        sync_path = #{syncPath,jdbcType=VARCHAR},
+      </if>
+      <if test="isSync != null">
+        is_sync = #{isSync,jdbcType=TINYINT},
+      </if>
+      <if test="lastSyncMd5 != null">
+        last_sync_md5 = #{lastSyncMd5,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ConsoleFileSync">
+    <!--@mbg.generated-->
+    update console_file_sync
+    set cluster_id = #{clusterId,jdbcType=BIGINT},
+      sync_path = #{syncPath,jdbcType=VARCHAR},
+      is_sync = #{isSync,jdbcType=TINYINT},
+      last_sync_md5 = #{lastSyncMd5,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=TINYINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getByClusterId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_file_sync
+    where cluster_id = #{clusterId,jdbcType=BIGINT}
+     and is_deleted = 0
+  </select>
+
+  <select id="listSyncDirectories" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+     from console_file_sync
+    where is_sync = 1 and is_deleted = 0
+  </select>
+
+  <update id="modifyMd5">
+    update console_file_sync set last_sync_md5 = #{md5,jdbcType=VARCHAR}
+     where cluster_id = #{clusterId,jdbcType=BIGINT}
+  </update>
+
+  <delete id="removeByClusterId">
+    delete from console_file_sync where cluster_id = #{clusterId,jdbcType=BIGINT}
+  </delete>
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskBlackDao">
+
+
+    <select id="findByTenantAndProjectAndAppType" resultType="com.dtstack.engine.api.domain.ScheduleTaskBlack">
+        SELECT `id`,`app_type`,`uic_tenant_id`,`project_id`,`task_type` FROM schedule_task_black WHERE
+        `app_type` = #{appType}
+        AND `uic_tenant_id` =#{dtuicTenantId}
+        AND `project_id` = #{projectId}
+        AND `is_deleted` = 0
+    </select>
+</mapper>

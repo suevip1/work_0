@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleProjectAccountDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleProjectAccount">
+    <!--@mbg.generated-->
+    <!--@Table console_project_account-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="project_id" jdbcType="BIGINT" property="projectId" />
+    <result column="app_type" jdbcType="INTEGER" property="appType" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="component_type_code" jdbcType="TINYINT" property="componentTypeCode" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, project_id, app_type, user_name, `password`, component_type_code, `status`, gmt_create, 
+    gmt_modified, is_deleted
+  </sql>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_project_account
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleProjectAccount" useGeneratedKeys="true">
+    insert into console_project_account (project_id, app_type, user_name,
+      `password`, component_type_code, `status`
+      )
+    values (#{record.projectId,jdbcType=BIGINT}, #{record.appType,jdbcType=INTEGER}, #{record.userName,jdbcType=VARCHAR},
+      #{record.password,jdbcType=VARCHAR}, #{record.componentTypeCode,jdbcType=TINYINT}, #{record.status,jdbcType=TINYINT}
+      )
+  </insert>
+
+  <update id="modify">
+    update console_project_account set
+      `status` = #{record.status},
+      user_name = #{record.userName},
+     `password` = #{record.password}
+     where id = #{record.id}
+  </update>
+
+  <select id="findByProjectAndComponent" resultMap="BaseResultMap">
+    SELECT  <include refid="Base_Column_List" />
+      from console_project_account
+    where project_id = #{entity.projectId} and app_type = #{entity.appType}
+      and component_type_code = #{entity.componentTypeCode}
+      and is_deleted = 0
+      limit 1
+  </select>
+</mapper>

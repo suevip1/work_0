@@ -1,0 +1,4 @@
+UPDATE console_component_config set value = '2048' where component_id = -109 and `key` = 'taskmanager.heap.mb' and dependencyKey = 'deploymode$session' and is_deleted = 0;
+INSERT INTO console_component_config (cluster_id, component_id, component_type_code, `type`, required, `key`, value, `values`, dependencyKey, dependencyValue, `desc`, gmt_create, gmt_modified, is_deleted) VALUES(-2, -109, 0, 'INPUT', 0, 'taskmanager.heap.mb', '2048', NULL, 'deploymode$perjob', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+UPDATE console_component_config set value = '2048m' where component_id = -115 and `key` = 'taskmanager.memory.process.size' and dependencyKey = 'deploymode$session' and is_deleted = 0;
+UPDATE console_component_config set value = '2048m' where component_id = -115 and `key` = 'taskmanager.memory.process.size' and dependencyKey = 'deploymode$perjob' and is_deleted = 0;

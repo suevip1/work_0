@@ -1,0 +1,1 @@
+ALTER TABLE `schedule_job` ADD COLUMN retry_type VARCHAR(256) DEFAULT NULL COMMENT '重试类型';

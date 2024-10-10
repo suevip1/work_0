@@ -1,0 +1,4 @@
+INSERT INTO `schedule_dict` (`dict_code`, `dict_name`, `dict_value`, `dict_desc`, `type`, `sort`, `data_type`, `depend_name`, `is_default`, `gmt_create`, `gmt_modified`, `is_deleted`) VALUES
+('flink_version_param', 'hidden', '1.10', 'flink 1.10版本隐藏', '35', '0', 'STRING', '', '0', NOW(), NOW(), '0');
+INSERT INTO `schedule_dict` (`dict_code`, `dict_name`, `dict_value`, `dict_desc`, `type`, `sort`, `data_type`, `depend_name`, `is_default`, `gmt_create`, `gmt_modified`, `is_deleted`) VALUES
+('flink_version_param', 'default', '1.12', 'flink 默认版本', '35', '0', 'STRING', '', '0', '2023-04-19 14:02:32', '2023-04-19 14:02:32', '0');

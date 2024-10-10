@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleCalenderTimeDao">
+
+    <insert id="insertBatch">
+        insert into
+        console_calender_time(calender_id,calender_time,extra_info)
+        values
+        <foreach collection="times" item="time" separator=",">
+            (#{time.calenderId},#{time.calenderTime},#{time.extraInfo})
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        delete from
+            console_calender_time where calender_id = #{calenderId}
+    </delete>
+
+    <select id="getByCalenderId" resultType="com.dtstack.engine.po.ConsoleCalenderTime">
+        select * from
+            console_calender_time where calender_id = #{calenderId}
+            <if test="startTime!=null">
+                and calender_time >= #{startTime}
+            </if>
+             limit #{size}
+    </select>
+
+    <select id="getByCalenderIdAndCalenderTime" resultType="com.dtstack.engine.po.ConsoleCalenderTime">
+        SELECT * FROM
+        console_calender_time WHERE calender_id = #{calenderId}
+        AND calender_time = #{calenderTime}
+        limit 1;
+    </select>
+
+    <select id="listAfterTime" resultType="com.dtstack.engine.po.ConsoleCalenderTime">
+        select * from
+            console_calender_time where calender_id = #{calenderId}
+                                 and calender_time >= #{startTime} and calender_time <![CDATA[<]]> #{endTime}
+    </select>
+
+    <select id="getNearestTime" resultType="com.dtstack.engine.po.ConsoleCalenderTime">
+        select * from
+            console_calender_time where calender_id = #{calenderId}
+        <choose>
+            <when test="canEq == true">
+                and calender_time <![CDATA[<=]]> #{currentTime}
+            </when>
+            <otherwise>
+                and calender_time <![CDATA[<]]> #{currentTime}
+            </otherwise>
+        </choose>
+        ORDER BY calender_time DESC LIMIT 1
+    </select>
+
+    <select id="getNearestOffset" resultType="com.dtstack.engine.po.ConsoleCalenderTime">
+        select * from
+        console_calender_time where calender_id = #{calenderId}
+        <choose>
+            <when test="canEq == true and symbol == true">
+                and calender_time <![CDATA[>=]]> #{currentLong}
+            </when>
+            <when test="canEq == false and symbol == true">
+                and calender_time <![CDATA[>]]> #{currentLong}
+            </when>
+            <when test="canEq == true and symbol == false">
+                and calender_time <![CDATA[<=]]> #{currentLong}
+            </when>
+            <when test="canEq == false and symbol == false">
+                and calender_time <![CDATA[<]]> #{currentLong}
+            </when>
+            <otherwise>
+                and calender_time <![CDATA[<]]> #{currentLong}
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="symbol == true">
+                ORDER BY calender_time ASC
+            </when>
+            <when test="symbol == false">
+                ORDER BY calender_time DESC
+            </when>
+            <otherwise>
+                ORDER BY calender_time DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit}
+    </select>
+
+    <select id="findClosestBusinessDate" resultType="java.lang.String">
+        SELECT calender_time FROM console_calender_time
+        WHERE calender_id = #{calenderId}
+        <choose>
+            <when test="operator == '+'.toString()">
+                AND calender_time <![CDATA[>]]> #{baseDate}
+                 ORDER BY calender_time ASC LIMIT #{limit}
+            </when>
+            <when test="operator == '-'.toString()">
+                AND calender_time <![CDATA[<]]> #{baseDate}
+                 ORDER BY calender_time DESC LIMIT #{limit}
+            </when>
+            <otherwise>
+                AND calender_time = #{baseDate}
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findClosestBusinessDateNotEquals" resultType="java.lang.String">
+        SELECT calender_time FROM console_calender_time
+        WHERE calender_id = #{calenderId}
+        <choose>
+            <when test="operator == '+'.toString()">
+                AND calender_time <![CDATA[>]]> #{baseDate}
+                ORDER BY calender_time ASC LIMIT #{limit}
+            </when>
+            <when test="operator == '-'.toString()">
+                AND calender_time <![CDATA[<]]> #{baseDate}
+                ORDER BY calender_time DESC LIMIT #{limit}
+            </when>
+            <otherwise>
+                AND calender_time = #{baseDate}
+            </otherwise>
+        </choose>
+    </select>
+
+
+</mapper>

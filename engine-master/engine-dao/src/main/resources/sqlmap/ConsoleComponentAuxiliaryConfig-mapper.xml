@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleComponentAuxiliaryConfigDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleComponentAuxiliaryConfig">
+    <!--@mbg.generated-->
+    <!--@Table console_component_auxiliary_config-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="auxiliary_id" jdbcType="INTEGER" property="auxiliaryId" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="LONGVARCHAR" property="value" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, auxiliary_id, `key`, `value`, gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from console_component_auxiliary_config
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from console_component_auxiliary_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliaryConfig" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary_config (auxiliary_id, `key`, `value`, 
+      gmt_create, gmt_modified, is_deleted
+      )
+    values (#{auxiliaryId,jdbcType=INTEGER}, #{key,jdbcType=VARCHAR}, #{value,jdbcType=LONGVARCHAR}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{isDeleted,jdbcType=TINYINT}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliaryConfig" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="auxiliaryId != null">
+        auxiliary_id,
+      </if>
+      <if test="key != null and key != ''">
+        `key`,
+      </if>
+      <if test="value != null and value != ''">
+        `value`,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="auxiliaryId != null">
+        #{auxiliaryId,jdbcType=INTEGER},
+      </if>
+      <if test="key != null and key != ''">
+        #{key,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null and value != ''">
+        #{value,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliaryConfig">
+    <!--@mbg.generated-->
+    update console_component_auxiliary_config
+    <set>
+      <if test="auxiliaryId != null">
+        auxiliary_id = #{auxiliaryId,jdbcType=INTEGER},
+      </if>
+      <if test="key != null and key != ''">
+        `key` = #{key,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null and value != ''">
+        `value` = #{value,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliaryConfig">
+    <!--@mbg.generated-->
+    update console_component_auxiliary_config
+    set auxiliary_id = #{auxiliaryId,jdbcType=INTEGER},
+      `key` = #{key,jdbcType=VARCHAR},
+      `value` = #{value,jdbcType=LONGVARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=TINYINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary_config
+    (auxiliary_id, `key`, `value`, gmt_create, gmt_modified, is_deleted)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.auxiliaryId,jdbcType=INTEGER}, #{item.key,jdbcType=VARCHAR}, #{item.value,jdbcType=LONGVARCHAR}, 
+        #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModified,jdbcType=TIMESTAMP}, #{item.isDeleted,jdbcType=TINYINT}
+        )
+    </foreach>
+  </insert>
+
+  <insert id="batchSave" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    insert into console_component_auxiliary_config
+    (auxiliary_id, `key`, `value`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.auxiliaryId,jdbcType=INTEGER}, #{item.key,jdbcType=VARCHAR}, #{item.value,jdbcType=LONGVARCHAR}
+      )
+    </foreach>
+  </insert>
+
+  <delete id="removeByAuxiliaryId">
+    delete from console_component_auxiliary_config where auxiliary_id = #{auxiliaryId,jdbcType=INTEGER}
+  </delete>
+
+  <select id="listByAuxiliaryId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from console_component_auxiliary_config
+      where auxiliary_id = #{auxiliaryId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="removeByClusterAndComponentAndType">
+    delete from console_component_auxiliary_config where auxiliary_id =
+      (select id from console_component_auxiliary where cluster_id = #{clusterId} and component_type_code = #{componentTypeCode}
+    <if test="type != null">
+      and `type` = #{type}
+    </if>
+      )
+    </delete>
+</mapper>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.AlertAlarmDao">
+
+    <sql id="Base_Column_List">
+      `id`, `tenant_id`, `project_id`, `app_type`, `name`, `alarm_type`, `scope`,`create_user_id`,
+      `open_status`, `extra_params`,`gmt_create`, `gmt_modified`, `is_deleted`
+    </sql>
+
+    <delete id="deleteByPrimaryKey">
+      delete from alert_alarm
+      where `id` = #{id}
+    </delete>
+
+  <delete id="deleteByIds">
+    delete from alert_alarm
+    where `id` IN
+    <foreach collection="ids" open="(" close=")" item="id" separator="," >
+      #{id}
+    </foreach>
+  </delete>
+
+  <insert id="insert" parameterType="com.dtstack.engine.po.AlertAlarm" useGeneratedKeys="true" keyProperty="id">
+      insert into alert_alarm (`id`, `tenant_id`, `project_id`,
+      `app_type`, `name`, `alarm_type`,`scope`,
+      `create_user_id`, `open_status`,`extra_params`, `gmt_create`,
+      `gmt_modified`, `is_deleted`)
+      values (#{id}, #{tenantId}, #{projectId},
+      #{appType}, #{name}, #{alarmType}, #{scope},
+      #{createUserId}, #{openStatus},#{extraParams}, #{gmtCreate},
+      #{gmtModified}, #{isDeleted})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultType="com.dtstack.engine.po.AlertAlarm">
+      select
+      <include refid="Base_Column_List" />
+      from alert_alarm
+      where `id` = #{id}
+    </select>
+
+    <select id="countByModel" resultType="java.lang.Long">
+      select
+      count(id)
+      from alert_alarm
+      where
+      `tenant_id` = #{model.tenantId}
+      and `project_id` = #{model.projectId}
+      and `app_type` = #{model.appType}
+      <if test="model.alarmIds!=null and model.alarmIds.size != 0">
+        and `id` IN
+        <foreach collection="model.alarmIds" separator="," item="alarmId" open="(" close=")">
+          #{alarmId}
+        </foreach>
+      </if>
+      <if test="model.createUserId!=null">
+        and `create_user_id` = #{model.createUserId}
+      </if>
+      <if test="model.openStatus!=null">
+        and `open_status` = #{model.openStatus}
+      </if>
+      <if test="model.alarmTypes!=null and model.alarmTypes.size != 0">
+        and  `alarm_type` IN
+        <foreach collection="model.alarmTypes" separator="," item="alarmType" open="(" close=")">
+          #{alarmType}
+        </foreach>
+      </if>
+      <if test="model.name!=null">
+        and `name` like  concat('%', #{model.name}, '%')
+      </if>
+    </select>
+
+  <select id="selectPageByModel" resultType="com.dtstack.engine.po.AlertAlarm">
+    select
+    <include refid="Base_Column_List"/>
+    from alert_alarm
+    where
+    `tenant_id` = #{model.tenantId}
+    and `project_id` = #{model.projectId}
+    and `app_type` = #{model.appType}
+    <if test="model.alarmIds!=null and model.alarmIds.size != 0">
+      and `id` IN
+      <foreach collection="model.alarmIds" separator="," item="alarmId" open="(" close=")">
+        #{alarmId}
+      </foreach>
+    </if>
+    <if test="model.createUserId!=null">
+      and `create_user_id` = #{model.createUserId}
+    </if>
+    <if test="model.openStatus !=null">
+      and `open_status` = #{model.openStatus}
+    </if>
+    <if test="model.alarmTypes!=null and model.alarmTypes.size != 0">
+      and  `alarm_type` IN
+      <foreach collection="model.alarmTypes" separator="," item="alarmType" open="(" close=")">
+        #{alarmType}
+      </foreach>
+    </if>
+    <if test="model.name!=null">
+      and `name` like  concat('%', #{model.name}, '%')
+    </if>
+    ORDER BY `gmt_create` DESC
+    limit #{model.start},#{model.pageSize}
+  </select>
+
+  <select id="selectByIds" resultType="com.dtstack.engine.po.AlertAlarm">
+    select
+    <include refid="Base_Column_List"/>
+    from alert_alarm
+    where  `is_deleted` = 0
+    and `id` IN
+    <foreach collection="alarmIds" separator="," item="alarmId" open="(" close=")">
+      #{alarmId}
+    </foreach>
+    <if test="appType!=null">
+      and `app_type` = #{appType}
+    </if>
+    <if test="projectId!=null">
+      and `project_id` = #{projectId}
+    </if>
+  </select>
+
+  <select id="selectIdByProjectId" resultType="com.dtstack.engine.po.AlertAlarm">
+    select
+    <include refid="Base_Column_List"/>
+    from alert_alarm
+    where  `is_deleted` = 0
+    AND `project_id` = #{projectId}
+    <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(nameList)">
+      AND `name` in
+      <foreach close=")" collection="nameList" index="idx" item="item" open="(" separator=",">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+
+    <select id="scanningAlertAlarmByIdLimit" resultType="com.dtstack.engine.po.AlertAlarm">
+      select
+      <include refid="Base_Column_List"/>
+      from alert_alarm
+      where `is_deleted` = 0
+      <if test="startId != null">
+        AND `id` &gt; #{startId}
+      </if>
+      <if test="alarmType !=null">
+        AND  `alarm_type` = #{alarmType}
+      </if>
+      ORDER BY `id`
+      LIMIT ${limit}
+    </select>
+
+    <select id="selectByProjectIdAndName" resultType="java.lang.String">
+      select
+      `name`
+      from alert_alarm
+      where `is_deleted` = 0
+       and `project_id` = #{projectId}
+          and `name` = #{name}
+    </select>
+
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.AlertAlarm">
+    update alert_alarm
+    <set>
+      <if test="tenantId != null">
+        `tenant_id` = #{tenantId},
+      </if>
+      <if test="projectId != null">
+        `project_id` = #{projectId},
+      </if>
+      <if test="appType != null">
+        `app_type` = #{appType},
+      </if>
+      <if test="name != null">
+        `name` = #{name},
+      </if>
+      <if test="alarmType != null">
+        `alarm_type` = #{alarmType},
+      </if>
+      <if test="createUserId != null">
+        `create_user_id` = #{createUserId},
+      </if>
+      <if test="openStatus != null">
+        `open_status` = #{openStatus},
+      </if>
+      <if test="extraParams != null">
+        `extra_params` = #{extraParams},
+      </if>
+      <if test="gmtCreate != null">
+        `gmt_create` = #{gmtCreate},
+      </if>
+      <if test="gmtModified != null">
+        `gmt_modified` = #{gmtModified},
+      </if>
+      <if test="isDeleted != null">
+        `is_deleted` = #{isDeleted},
+      </if>
+      <if test="scope != null">
+        `scope` = #{scope},
+      </if>
+    </set>
+    where `id` = #{id}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.AlertAlarm">
+    update alert_alarm
+    set `tenant_id` = #{tenantId},
+    `project_id` = #{projectId},
+    `app_type` = #{appType},
+    `name` = #{name},
+    `alarm_type` = #{alarmType},
+    `scope` = #{scope},
+    `create_user_id` = #{createUserId},
+    `open_status` = #{openStatus},
+    `gmt_create` = #{gmtCreate},
+    `gmt_modified` = #{gmtModified},
+    `is_deleted` = #{isDeleted}
+    where `id` = #{id}
+  </update>
+
+  <update id="updateOpenStatusById">
+    update alert_alarm
+    set `gmt_modified` = NOW(),
+    `open_status` = #{openStatus}
+    where `id` = #{id} AND  `is_deleted` = 0
+  </update>
+
+
+
+  <select id="listByProjectIdAndAppTypeAndScope" resultType="com.dtstack.engine.po.AlertAlarm">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM alert_alarm
+    WHERE  `is_deleted` = 0
+    AND `project_id` = #{projectId}
+    AND `app_type` = #{appType}
+    <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(scopes)">
+      AND `scope` in
+      <foreach collection="scopes" open="(" close=")" item="scope" separator=",">
+        #{scope}
+      </foreach>
+    </if>
+  </select>
+</mapper>

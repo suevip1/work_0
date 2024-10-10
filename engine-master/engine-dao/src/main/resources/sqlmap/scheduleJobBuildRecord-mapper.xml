@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobBuildRecordDao">
+
+    <sql id="select_content_fragment">
+        `id`,`job_build_type`,`job_build_status`,`job_build_log`,`schedule_type`,`task_id`,`app_type`,`gmt_create`,`gmt_modified`,`is_deleted`
+    </sql>
+
+    <sql id="select_where_fragment">
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+
+            <if test="model.jobBuildTypeList != null and model.jobBuildTypeList.size() > 0">
+                AND sjbr.job_build_type IN
+                <foreach item="jobBuildType" index="index" collection="model.jobBuildTypeList" open="(" separator="," close=")">
+                    #{jobBuildType}
+                </foreach>
+            </if>
+
+            <if test="model.jobBuildStatusList != null and model.jobBuildStatusList.size() > 0">
+                AND sjbr.job_build_status IN
+                <foreach item="jobBuildStatus" index="index" collection="model.jobBuildStatusList" open="(" separator="," close=")">
+                    #{jobBuildStatus}
+                </foreach>
+            </if>
+
+            <if test="model.scheduleTypeList != null and model.scheduleTypeList.size() > 0">
+                AND sjbr.schedule_type IN
+                <foreach item="scheduleType" index="index" collection="model.scheduleTypeList" open="(" separator="," close=")">
+                    #{scheduleType}
+                </foreach>
+            </if>
+
+            <if test="model.taskIdList != null and model.taskIdList.size() > 0">
+                AND sjbr.task_id IN
+                <foreach item="taskId" index="index" collection="model.taskIdList" open="(" separator="," close=")">
+                    #{taskId}
+                </foreach>
+            </if>
+
+            <if test="model.greaterTime != null">
+                AND sjbr.gmt_create <![CDATA[>=]]> #{model.greaterTime}
+            </if>
+
+            AND sjbr.is_deleted = 0
+        </trim>
+    </sql>
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.ScheduleJobBuildRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO schedule_job_build_record
+            (`job_build_type`,`job_build_status`,`job_build_log`,`schedule_type`,`task_id`,`app_type`,`gmt_create`,`gmt_modified`,`is_deleted`)
+        VALUES
+            (#{jobBuildType}, #{jobBuildStatus}, #{jobBuildLog}, #{scheduleType}, #{taskId}, #{appType}, now(), now(), 0)
+    </insert>
+
+    <update id="updateJobBuildStatus">
+        UPDATE schedule_job_build_record
+        SET `job_build_status` = #{jobBuildStatus},
+        `gmt_modified` = now()
+        WHERE `is_deleted` = 0
+        <if test="recordIdList!=null and recordIdList.size() > 0">
+            AND `id` IN
+            <foreach item="recordId" index="index" collection="recordIdList" open="(" separator=","
+                     close=")">
+                #{recordId}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateJobBuildStatusAndLog">
+        UPDATE schedule_job_build_record
+        SET `job_build_status` = #{jobBuildStatus},
+            `job_build_log`    = #{jobBuildLog},
+            `gmt_modified`     = now()
+        WHERE `is_deleted` = 0
+        <if test="recordIdList!=null and recordIdList.size() > 0">
+            AND `id` IN
+            <foreach item="recordId" index="index" collection="recordIdList" open="(" separator=","
+                     close=")">
+                #{recordId}
+            </foreach>
+        </if>
+    </update>
+
+    <select id="getByCondition"
+            resultType="com.dtstack.engine.po.ScheduleJobBuildRecord">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_job_build_record sjbr
+        <include refid="select_where_fragment"/>
+        ORDER BY `gmt_create` ASC
+    </select>
+
+</mapper>

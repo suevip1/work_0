@@ -1,0 +1,1 @@
+UPDATE schedule_dict SET `dict_value` = '0' WHERE `dict_code` = 'task_client_type' AND dict_name = 'hadoop' AND `type` = 23 AND `is_deleted` = 0;

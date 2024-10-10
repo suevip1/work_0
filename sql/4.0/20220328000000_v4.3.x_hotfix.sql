@@ -1,0 +1,1 @@
+ALTER TABLE schedule_engine_job_checkpoint MODIFY `checkpoint_size` bigint(20) DEFAULT NULL COMMENT 'checkpoint文件大小';

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobOperateDao">
+
+    <sql id="select_content_fragment">
+        id,job_id,operate_type,operate_content,operate_id,gmt_create,gmt_modified,is_deleted
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO schedule_job_operate
+        (job_id,operate_type,operate_content,operate_id,gmt_create,gmt_modified,is_deleted)
+        VALUES (
+        #{scheduleJobOperate.jobId},
+        #{scheduleJobOperate.operateType},
+        #{scheduleJobOperate.operateContent},
+        #{scheduleJobOperate.operateId},
+        #{scheduleJobOperate.gmtCreate},
+        #{scheduleJobOperate.gmtModified},
+        #{scheduleJobOperate.isDeleted})
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO schedule_job_operate
+        (job_id,operate_type,operate_content,operate_id,gmt_create,gmt_modified,is_deleted)
+        VALUES
+        <foreach collection="scheduleJobOperates" separator="," item="scheduleJobOperate">
+            (#{scheduleJobOperate.jobId},
+            #{scheduleJobOperate.operateType},
+            #{scheduleJobOperate.operateContent},
+            #{scheduleJobOperate.operateId},
+            #{scheduleJobOperate.gmtCreate},
+            #{scheduleJobOperate.gmtModified},
+            #{scheduleJobOperate.isDeleted})
+        </foreach>
+    </insert>
+
+    <select id="countPage" resultType="java.lang.Integer">
+        SELECT count(id)
+        FROM schedule_job_operate
+        WHERE job_id = #{jobId} and is_deleted = 0
+    </select>
+
+    <select id="page" resultType="com.dtstack.engine.po.ScheduleJobOperate">
+        SELECT <include refid="select_content_fragment"/>
+        FROM schedule_job_operate
+        WHERE job_id = #{pageParam.jobId} and is_deleted = 0
+        LIMIT #{pageParam.start},#{pageParam.pageSize}
+    </select>
+
+
+</mapper>

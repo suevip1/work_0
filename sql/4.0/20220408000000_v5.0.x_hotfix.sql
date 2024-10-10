@@ -1,0 +1,1 @@
+UPDATE schedule_dict SET `dict_value` = '1.x' WHERE `dict_code` = 'hive_version' AND dict_name = '1.x' AND `type` = 4 AND `is_deleted` = 0;

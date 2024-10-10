@@ -1,0 +1,1 @@
+ALTER  TABLE console_security_log MODIFY `action` text COMMENT '执行的动作';

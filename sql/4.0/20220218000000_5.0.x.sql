@@ -1,0 +1,1 @@
+alter table alert_content change send_info send_info TEXT COMMENT '发送信息(上下文对象)';

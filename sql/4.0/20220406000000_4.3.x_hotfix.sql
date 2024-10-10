@@ -1,0 +1,1 @@
+alter table schedule_fill_data_job add COLUMN fill_data_failure varchar(1024) DEFAULT NULL COMMENT '补数据失败原因';

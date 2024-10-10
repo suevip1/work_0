@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskChainParamDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleTaskChainParam">
+    <!--@Table schedule_task_chain_param-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="task_id" jdbcType="INTEGER" property="taskId" />
+    <result column="app_type" jdbcType="INTEGER" property="appType" />
+    <result column="task_type" jdbcType="TINYINT" property="taskType" />
+    <result column="param_name" jdbcType="VARCHAR" property="paramName" />
+    <result column="type" jdbcType="TINYINT" property="type" />
+    <result column="output_param_type" jdbcType="TINYINT" property="outputParamType" />
+    <result column="father_task_id" jdbcType="INTEGER" property="fatherTaskId" />
+    <result column="father_app_type" jdbcType="INTEGER" property="fatherAppType" />
+    <result column="father_param_name" jdbcType="VARCHAR" property="fatherParamName" />
+    <result column="param_command" jdbcType="VARCHAR" property="paramCommand" />
+    <result column="flow_id" jdbcType="BIGINT" property="flowId" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, task_id, app_type, task_type, param_name, `type`, output_param_type, father_task_id, 
+    father_app_type, father_param_name, param_command, flow_id, gmt_create, gmt_modified
+  </sql>
+  <insert id="batchSave" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    insert into schedule_task_chain_param
+    (task_id, app_type, task_type, param_name, `type`, output_param_type, father_task_id, 
+      father_app_type, father_param_name, param_command, flow_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.taskId,jdbcType=INTEGER}, #{item.appType,jdbcType=INTEGER}, #{item.taskType,jdbcType=TINYINT}, 
+        #{item.paramName,jdbcType=VARCHAR}, #{item.type,jdbcType=TINYINT}, #{item.outputParamType,jdbcType=TINYINT}, 
+        #{item.fatherTaskId,jdbcType=INTEGER}, #{item.fatherAppType,jdbcType=INTEGER}, 
+        #{item.fatherParamName,jdbcType=VARCHAR}, #{item.paramCommand,jdbcType=VARCHAR}, #{item.flowId})
+    </foreach>
+  </insert>
+
+  <delete id="deleteInOutParamsByTaskShade">
+    delete from schedule_task_chain_param where task_id = #{taskId} and app_type = #{appType} and `type` in (5, 6)
+  </delete>
+
+  <delete id="deleteByTaskShade">
+    delete from schedule_task_chain_param where task_id = #{taskId} and app_type = #{appType}
+  </delete>
+
+  <select id="listParamsByTask" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_task_chain_param
+    where task_id = #{taskId} and app_type = #{appType}
+     and `type` = #{type}
+  </select>
+  <select id="listOutputParamsByTask" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_task_chain_param
+    where task_id = #{taskId} and app_type = #{appType}
+     and `type` = 6 and output_param_type = #{outputParamType}
+  </select>
+
+  <select id="getParamByTaskAndName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from schedule_task_chain_param
+     where task_id = #{taskShade.taskId} and app_type = #{taskShade.appType}
+      and `type` = #{type} and param_name = #{paramName,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByTaskAndType">
+    delete from schedule_task_chain_param
+     where task_id = #{taskId} and app_type = #{appType} and `type` = #{type}
+  </delete>
+
+  <delete id="deleteByTasksAndType">
+    delete from schedule_task_chain_param
+    where task_id in
+      <foreach item="taskId" index="index" collection="taskIds" open="(" separator="," close=")">
+        #{taskId}
+      </foreach>
+    and app_type = #{appType} and `type` = #{type}
+  </delete>
+
+  <delete id="deleteByTasks">
+    delete from schedule_task_chain_param
+    where task_id in
+    <foreach item="taskId" index="index" collection="taskIds" open="(" separator="," close=")">
+      #{taskId}
+    </foreach>
+    and app_type = #{appType}
+  </delete>
+
+  <delete id="deleteFlowParamsByFlowTaskAndType">
+     delete from schedule_task_chain_param
+      where flow_id = #{flowId} and app_type = #{appType} and `type` = 11
+  </delete>
+
+  <delete id="removeIdenticalWorkflowParam">
+    delete from schedule_task_chain_param
+     where task_id = #{taskId} and app_type = #{appType} and `type` = 11
+       <!--必须是子节点，因为子节点才真正引用到全局参数-->
+      and flow_id != 0
+      and param_name in
+        <foreach item="paramName" index="index" collection="paramNames" open="(" separator="," close=")">
+          #{paramName}
+        </foreach>
+  </delete>
+
+  <select id="findTaskBindWorkflowParams" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_task_chain_param
+    where task_id = #{taskId} and app_type = #{appType}
+     and `type` = 11
+  </select>
+</mapper>

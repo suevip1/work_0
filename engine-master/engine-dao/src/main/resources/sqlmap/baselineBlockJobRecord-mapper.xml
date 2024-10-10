@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineBlockJobRecordDao">
+    <sql id="Base_Column_List">
+        `id`, `task_name`, `app_type`, `task_id`, `project_id`, `tenant_id`, `baseline_task_id`,`baseline_job_id`,
+        `owner_user_id`, `job_status`, `blocking_reason`, `gmt_create`, `gmt_modified`, `is_deleted`
+    </sql>
+
+    <insert id="insert">
+        insert into baseline_block_job_record (`id`, `task_name`, `app_type`,
+        `task_id`, `project_id`, `tenant_id`,
+        `baseline_task_id`,`baseline_job_id`, `owner_user_id`, `job_status`,
+        `blocking_reason`, `is_deleted`)
+        values (#{id}, #{taskName}, #{appType},
+        #{taskId}, #{projectId}, #{tenantId},
+        #{baselineTaskId},#{baselineJobId}, #{ownerUserId}, #{jobStatus},
+        #{blockingReason},#{isDeleted})
+    </insert>
+
+    <delete id="deleteByBaselineJobId">
+        delete from baseline_block_job_record
+        where `baseline_job_id` = #{baselineJobId}
+    </delete>
+
+    <select id="selectByBaselineJobId" resultType="com.dtstack.engine.po.BaselineBlockJobRecord">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_block_job_record
+        WHERE `baseline_job_id` = #{baselineJobId}
+        AND `is_deleted` = 0
+    </select>
+
+</mapper>

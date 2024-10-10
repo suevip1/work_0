@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobGraphDao">
+
+
+    <insert id="batchInsert">
+        INSERT IGNORE INTO schedule_job_graph(`app_type`,`uic_tenant_id`,`project_id`,`date`,`hour`,`count`)
+        VALUES
+            <foreach collection="scheduleJobGraphs" item="scheduleJobGraph" open="" close="" separator=",">
+                (
+                    #{scheduleJobGraph.appType},
+                    #{scheduleJobGraph.uicTenantId},
+                    #{scheduleJobGraph.projectId},
+                    #{scheduleJobGraph.date},
+                    #{scheduleJobGraph.hour},
+                    #{scheduleJobGraph.count}
+                )
+            </foreach>
+    </insert>
+
+    <select id="selectByDate" resultType="com.dtstack.engine.po.ScheduleJobGraph">
+        SELECT
+            `app_type`,
+            `uic_tenant_id`,
+            `project_id`,
+            `date`,
+            `hour`,
+            `count`
+        FROM schedule_job_graph
+        WHERE `is_deleted` = 0
+        <if test="appType != null ">
+            AND `app_type` = #{appType}
+        </if>
+        <if test="dtuicTenantId != null and dtuicTenantId != -1">
+            AND `uic_tenant_id` = #{dtuicTenantId}
+        </if>
+        <if test="projectId!=null and projectId != -1 ">
+            AND `project_id` = #{projectId}
+        </if>
+        AND  `date` > #{date}
+    </select>
+
+</mapper>

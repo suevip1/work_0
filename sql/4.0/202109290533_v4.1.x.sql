@@ -1,0 +1,1 @@
+ALTER TABLE `alert_channel` MODIFY COLUMN `file_path` varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT '' NULL COMMENT '自定义jar存储位置';

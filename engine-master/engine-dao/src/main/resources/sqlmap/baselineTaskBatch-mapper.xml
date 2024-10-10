@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineTaskBatchDao">
+
+    <sql id="Base_Column_List">
+        id,baseline_task_id,cyc_time,reply_time,open_status,gmt_create,gmt_modified,is_deleted
+    </sql>
+
+    <insert id="batchInsert">
+        insert into baseline_task_batch(
+            baseline_task_id,
+            cyc_time,
+            reply_time,
+            open_status,
+            is_deleted
+        )
+        values
+        <foreach collection="baselineTaskBatches" item="baselineTaskBatch" separator="," >
+            (#{baselineTaskBatch.baselineTaskId},
+            #{baselineTaskBatch.cycTime},
+            #{baselineTaskBatch.replyTime},
+            #{baselineTaskBatch.openStatus},
+            #{baselineTaskBatch.isDeleted})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByBaselineTaskId">
+        delete from baseline_task_batch where baseline_task_id = #{baselineTaskId}
+    </delete>
+
+    <select id="selectByBaselineTaskId" resultType="com.dtstack.engine.po.BaselineTaskBatch">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_task_batch
+        WHERE baseline_task_id = #{baselineTaskId} AND is_deleted = 0 order by cyc_time
+    </select>
+
+    <select id="selectByBaselineTaskIdAndCycTime" resultType="com.dtstack.engine.po.BaselineTaskBatch">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_task_batch
+        WHERE baseline_task_id = #{baselineTaskId} AND is_deleted = 0 AND cyc_time = #{cycTime} LIMIT 1
+    </select>
+
+
+    <select id="selectByBaselineTaskIds" resultType="com.dtstack.engine.po.BaselineTaskBatch">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_task_batch
+        WHERE baseline_task_id IN
+        <foreach collection="baselineTaskIds" separator="," item="baselineTaskId" close=")" open="(" >
+            #{baselineTaskId}
+        </foreach>
+        AND is_deleted = 0
+    </select>
+
+
+</mapper>

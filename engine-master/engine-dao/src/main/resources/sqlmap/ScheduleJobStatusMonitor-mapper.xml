@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobStatusMonitorDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleJobStatusMonitor">
+    <!--@mbg.generated-->
+    <!--@Table schedule_job_status_monitor-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="app_type_key" jdbcType="VARCHAR" property="appTypeKey" />
+    <result column="callback_url" jdbcType="VARCHAR" property="callbackUrl" />
+    <result column="listener_policy" jdbcType="LONGVARCHAR" property="listenerPolicy" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="BOOLEAN" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, app_type_key, callback_url, listener_policy, gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from schedule_job_status_monitor
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from schedule_job_status_monitor
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleJobStatusMonitor" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_monitor (app_type_key, callback_url, listener_policy, 
+      gmt_create, gmt_modified, is_deleted
+      )
+    values (#{appTypeKey,jdbcType=VARCHAR}, #{callbackUrl,jdbcType=VARCHAR}, #{listenerPolicy,jdbcType=LONGVARCHAR}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{isDeleted,jdbcType=BOOLEAN}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleJobStatusMonitor" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_monitor
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="appTypeKey != null">
+        app_type_key,
+      </if>
+      <if test="callbackUrl != null">
+        callback_url,
+      </if>
+      <if test="listenerPolicy != null">
+        listener_policy,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="appTypeKey != null">
+        #{appTypeKey,jdbcType=VARCHAR},
+      </if>
+      <if test="callbackUrl != null">
+        #{callbackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="listenerPolicy != null">
+        #{listenerPolicy,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BOOLEAN},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ScheduleJobStatusMonitor">
+    <!--@mbg.generated-->
+    update schedule_job_status_monitor
+    <set>
+      <if test="appTypeKey != null">
+        app_type_key = #{appTypeKey,jdbcType=VARCHAR},
+      </if>
+      <if test="callbackUrl != null">
+        callback_url = #{callbackUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="listenerPolicy != null">
+        listener_policy = #{listenerPolicy,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BOOLEAN},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ScheduleJobStatusMonitor">
+    <!--@mbg.generated-->
+    update schedule_job_status_monitor
+    set app_type_key = #{appTypeKey,jdbcType=VARCHAR},
+      callback_url = #{callbackUrl,jdbcType=VARCHAR},
+      listener_policy = #{listenerPolicy,jdbcType=LONGVARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BOOLEAN}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_monitor
+    (app_type_key, callback_url, listener_policy, gmt_create, gmt_modified, is_deleted
+      )
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.appTypeKey,jdbcType=VARCHAR}, #{item.callbackUrl,jdbcType=VARCHAR}, #{item.listenerPolicy,jdbcType=LONGVARCHAR}, 
+        #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModified,jdbcType=TIMESTAMP}, #{item.isDeleted,jdbcType=BOOLEAN}
+        )
+    </foreach>
+  </insert>
+
+  <select id="checkExistsByAppTypeKey" resultType="java.lang.Integer">
+    select 1 from schedule_job_status_monitor where app_type_key = #{appTypeKey,jdbcType=VARCHAR} and is_deleted = 0 limit 1
+  </select>
+
+  <select id="getByAppTypeKey" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+        from schedule_job_status_monitor
+    where app_type_key = #{appTypeKey,jdbcType=VARCHAR} and is_deleted = 0
+  </select>
+
+  <select id="listAll" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+     from schedule_job_status_monitor where is_deleted = 0
+  </select>
+</mapper>

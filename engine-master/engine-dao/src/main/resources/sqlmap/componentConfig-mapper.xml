@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ComponentConfigDao">
+
+    <sql id="select_content_fragment">
+        id,cluster_id,component_id,component_type_code,type,required,`key`,`value`,`values`,dependencyKey,dependencyValue,cascade_key,cascade_value,`desc`,gmt_create,gmt_modified,is_deleted
+    </sql>
+
+    <insert id="insertBatch">
+        insert into
+        console_component_config(cluster_id,component_id,component_type_code,`type`,`required`,`key`,`value`,`values`,dependencyKey,dependencyValue,`cascade_key`,`cascade_value`,`desc`)
+        values
+        <foreach collection="componentConfigs" item="config" separator=",">
+            (#{config.clusterId},#{config.componentId},#{config.componentTypeCode},#{config.type},#{config.required},
+            #{config.key},#{config.value},#{config.values},#{config.dependencyKey},#{config.dependencyValue},#{config.cascadeKey},#{config.cascadeValue},#{config.desc})
+        </foreach>
+    </insert>
+
+
+    <sql id="update_fragment">
+        <set>
+            <if test="key!=null">
+                `key` = #{key},
+            </if>
+            <if test="value!=null">
+                `value` = #{value},
+            </if>
+            <if test="values!=null">
+                `values` = #{values},
+            </if>
+            <if test="dependencyKey!=null">
+                dependencyKey = #{dependencyKey},
+            </if>
+            <if test="dependencyValue!=null">
+                dependencyValue = #{dependencyValue},
+            </if>
+            gmt_modified = now(),
+        </set>
+    </sql>
+
+    <select id="listByComponentId" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config
+        where component_id = #{componentId} and is_deleted = 0
+        <if test="true == isFilter">
+            and `type` != 'OTHER'
+        </if>
+    </select>
+
+    <select id="listByClusterId" resultType="ComponentConfig">
+        SELECT ccc.id,ccc.cluster_id,ccc.component_id,ccc.component_type_code,ccc.type,ccc.required,ccc.key,ccc.value,ccc.values,ccc.dependencyKey,ccc.dependencyValue,ccc.cascade_key,ccc.cascade_value,ccc.desc,ccc.gmt_create,ccc.gmt_modified,ccc.is_deleted
+        FROM console_component_config ccc
+        WHERE ccc.cluster_id = #{clusterId} AND ccc.is_deleted = 0
+        <if test="true == isFilter">
+            and ccc.type != 'OTHER'
+        </if>
+    </select>
+
+    <select id="listByComponentIds" resultType="ComponentConfig">
+        select
+        ccc.id,ccc.cluster_id,ccc.component_id,ccc.component_type_code,ccc.type,ccc.required,ccc.key,ccc.value,ccc.values,ccc.dependencyKey,ccc.dependencyValue,ccc.cascade_key,ccc.cascade_value,ccc.desc,ccc.gmt_create,ccc.gmt_modified,ccc.is_deleted
+        from console_component_config ccc
+        where ccc.component_id in
+        <foreach collection="componentIds" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        and ccc.is_deleted = 0
+        <if test="true == isFilter">
+            and ccc.type != 'OTHER'
+        </if>
+    </select>
+
+    <select id="listByType" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config
+        where component_id = #{componentId} and is_deleted = 0
+        and `type` = #{type}
+    </select>
+
+    <select id="listByComponentTypeAndKey" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config
+        where cluster_id = #{clusterId} and is_deleted = 0 AND `key` = #{key} AND component_type_code = #{componentTypeCode}
+    </select>
+
+    <select id="listByKey" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config
+        where is_deleted = 0
+        and component_id = #{componentId} and `key` = #{key}
+        limit 1
+    </select>
+
+    <delete id="deleteByComponentId">
+        delete
+        from console_component_config
+        where component_id = #{componentId}
+    </delete>
+
+    <delete id="deleteByComponentIdAndKeyAndComponentTypeCode">
+        delete
+        from console_component_config
+        where component_id = #{componentId}
+          and `key` = #{key}
+          and component_type_code = #{typeCode}
+    </delete>
+
+    <select id="listFirst" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config where component_id > 0
+        limit 1
+    </select>
+
+    <select id="listByComponentIdAndKey" resultType="ComponentConfig">
+        select
+        <include refid="select_content_fragment"/>
+        from console_component_config
+        where is_deleted = 0
+        and component_id = #{componentId} and `key` = #{key}
+        limit 2
+    </select>
+
+    <select id="listRequiredKeyWithNullValue" resultType="ComponentConfig">
+          select
+        <include refid="select_content_fragment"/>
+          from console_component_config where (value is null or value = '') and required =  1 and dependencyKey not in ('auth$password','auth$rsaPath') and
+          component_id = #{componentId}
+        <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(excludeDeployModes)">
+            <foreach item="item" index="index" collection="excludeDeployModes">
+                and (dependencyKey not like concat('deploymode$', #{item}, '%') or dependencyKey is null)
+            </foreach>
+        </if>
+    </select>
+
+    <update id="update">
+        update console_component_config
+        <include refid="update_fragment"/> where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ProjectStatisticsDao">
+
+
+    <insert id="insertBatch" parameterType="com.dtstack.engine.po.ProjectStatistics" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into project_statistics
+        (tenant_id,project_id,app_type,total_job,un_submit_job,run_job,fail_job,alarm_total,user_id,gmt_create)
+        VALUES
+        <foreach item="item" index="index" collection="list" separator=",">
+            (#{item.tenantId},#{item.projectId},#{item.appType},#{item.totalJob},
+            #{item.unSubmitJob},#{item.runJob},#{item.failJob},#{item.alarmTotal},#{item.userId},#{item.gmtCreate})
+        </foreach>
+
+    </insert>
+
+
+    <delete id="delete">
+        DELETE
+        FROM project_statistics
+        WHERE gmt_create &lt;= #{gmtCreate}
+    </delete>
+
+
+    <select id="queryLast" resultType="com.dtstack.engine.po.ProjectStatistics">
+        SELECT * FROM project_statistics WHERE tenant_id = #{tenantId} AND project_id = #{projectId} AND user_id =
+        #{userId} AND app_type = #{appType}
+        <if test="gmtCreate!=null">
+            AND gmt_create = #{gmtCreate}
+        </if>
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+
+    <select id="queryTotalUserRecentTime" resultType="com.dtstack.engine.po.ProjectStatistics">
+        SELECT sum(total_job)     as total_job,
+               sum(un_submit_job) as un_submit_job,
+               sum(fail_job)      as fail_job,
+               sum(alarm_total)   as alarm_total,
+               sum(run_job)       as run_job
+        FROM project_statistics
+        WHERE user_id = #{userId}
+          AND app_type = #{appType}
+          AND gmt_create = #{gmtCreate}
+          AND tenant_id = #{tenantId}
+    </select>
+
+
+    <select id="queryTotalTenantRecentTime" resultType="com.dtstack.engine.po.ProjectStatistics">
+        SELECT sum(total_job)     as total_job,
+               sum(un_submit_job) as un_submit_job,
+               sum(fail_job)      as fail_job,
+               sum(alarm_total)   as alarm_total,
+               sum(run_job)       as run_job
+        FROM project_statistics
+        WHERE tenant_id = #{tenantId}
+          AND app_type = #{appType}
+          AND gmt_create = #{gmtCreate}
+          AND user_id = #{userId}
+    </select>
+
+
+    <select id="queryTotalProjects" resultType="com.dtstack.engine.po.ProjectStatistics">
+        SELECT sum(total_job) as total_job ,
+        sum(un_submit_job) as un_submit_job,
+        sum(fail_job) as fail_job,
+        sum(alarm_total) as alarm_total,
+        sum(run_job) as run_job
+        FROM project_statistics
+        WHERE tenant_id = #{tenantId}
+        AND app_type = #{appType}
+        AND gmt_create = #{gmtCreate}
+        AND project_id in
+        <foreach collection="projectIds" close=")" open="(" separator="," item="projectId">
+            #{projectId}
+        </foreach>
+        AND user_id = #{userId}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleProjectParamDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleProjectParam">
+    <!--@mbg.generated-->
+    <!--@Table schedule_project_param-->
+    <id column="id" property="id" />
+    <result column="param_name" property="paramName" />
+    <result column="param_value" property="paramValue" />
+    <result column="param_desc" property="paramDesc" />
+    <result column="param_type" property="paramType" />
+    <result column="project_id" property="projectId" />
+    <result column="is_deleted" property="isDeleted" />
+    <result column="gmt_create" property="gmtCreate" />
+    <result column="gmt_modified" property="gmtModified" />
+    <result column="create_user_id" property="createUserId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, param_name, param_value, param_desc, param_type, project_id, is_deleted, gmt_create, 
+    gmt_modified, create_user_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from schedule_project_param
+    where id = #{id}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--@mbg.generated-->
+    delete from schedule_project_param
+    where id = #{id}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleProjectParam" useGeneratedKeys="true">
+    insert into schedule_project_param (param_name, param_value, param_desc, param_type, project_id, create_user_id)
+    values (#{paramName}, #{paramValue}, #{paramDesc}, #{paramType}, #{projectId}, #{createUserId})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleProjectParam" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_project_param
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="paramName != null and paramName != ''">
+        param_name,
+      </if>
+      <if test="paramValue != null and paramValue != ''">
+        param_value,
+      </if>
+      <if test="paramDesc != null and paramDesc != ''">
+        param_desc,
+      </if>
+      <if test="paramType != null">
+        param_type,
+      </if>
+      <if test="projectId != null">
+        project_id,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="createUserId != null">
+        create_user_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="paramName != null and paramName != ''">
+        #{paramName},
+      </if>
+      <if test="paramValue != null and paramValue != ''">
+        #{paramValue},
+      </if>
+      <if test="paramDesc != null and paramDesc != ''">
+        #{paramDesc},
+      </if>
+      <if test="paramType != null">
+        #{paramType},
+      </if>
+      <if test="projectId != null">
+        #{projectId},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified},
+      </if>
+      <if test="createUserId != null">
+        #{createUserId},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ScheduleProjectParam">
+    <!--@mbg.generated-->
+    update schedule_project_param
+    <set>
+      <if test="paramName != null and paramName != ''">
+        param_name = #{paramName},
+      </if>
+      <if test="paramValue != null and paramValue != ''">
+        param_value = #{paramValue},
+      </if>
+      <if test="paramDesc != null and paramDesc != ''">
+        param_desc = #{paramDesc},
+      </if>
+      <if test="paramType != null">
+        param_type = #{paramType},
+      </if>
+      <if test="projectId != null">
+        project_id = #{projectId},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified},
+      </if>
+      <if test="createUserId != null">
+        create_user_id = #{createUserId},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ScheduleProjectParam">
+    <!--@mbg.generated-->
+    update schedule_project_param
+    set param_name = #{paramName},
+      param_value = #{paramValue},
+      param_desc = #{paramDesc},
+      param_type = #{paramType},
+      project_id = #{projectId},
+      is_deleted = #{isDeleted},
+      gmt_create = #{gmtCreate},
+      gmt_modified = #{gmtModified},
+      create_user_id = #{createUserId}
+    where id = #{id}
+  </update>
+
+  <update id="modifyById" parameterType="com.dtstack.engine.po.ScheduleProjectParam">
+    update schedule_project_param
+     set param_name = #{paramName},
+    param_value = #{paramValue},
+    param_desc = #{paramDesc},
+    param_type = #{paramType},
+    project_id = #{projectId}
+    where id = #{id}
+  </update>
+
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_project_param
+    (param_name, param_value, param_desc, param_type, project_id, is_deleted, gmt_create, 
+      gmt_modified, create_user_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.paramName}, #{item.paramValue}, #{item.paramDesc}, #{item.paramType}, #{item.projectId}, 
+        #{item.isDeleted}, #{item.gmtCreate}, #{item.gmtModified}, #{item.createUserId}
+        )
+    </foreach>
+  </insert>
+
+  <select id="findByProjectAndName" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_project_param
+    where project_id = #{projectId} and param_name = #{paramName} and is_deleted = 0
+  </select>
+
+  <delete id="removeBatch">
+    delete from schedule_project_param
+    where id in
+    <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+      #{id}
+    </foreach>
+  </delete>
+
+  <select id="list" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_project_param
+    where project_id = #{queryDTO.projectId} and is_deleted = 0
+  </select>
+
+  <select id="count" resultType="java.lang.Integer">
+    select count(1)
+     from schedule_project_param
+    where project_id = #{queryDTO.projectId} and is_deleted = 0
+  </select>
+
+  <select id="findByProjectId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+      from schedule_project_param
+    where project_id = #{projectId} and is_deleted = 0
+  </select>
+
+  <select id="findByIds" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+     from schedule_project_param
+    where id in
+    <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+      #{id}
+    </foreach>
+  </select>
+
+  <select id="listParamNamesByProjectId" resultType="java.lang.String">
+    select param_name
+     from schedule_project_param
+    where project_id = #{projectId} and is_deleted = 0
+  </select>
+</mapper>

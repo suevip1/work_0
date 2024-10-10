@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineJobJobDao">
+
+
+
+    <sql id="Base_Column_List">
+        `id`, `baseline_job_id`, `task_id`, `task_app_type`, `job_id`, `expect_start_time`,
+        `estimated_exec_time`, `expect_end_time`,`early_warning_start_time`,`early_warning_end_time`,
+        `broken_line_start_time`,`broken_line_end_time`, `baseline_task_type`, `gmt_create`, `gmt_modified`,
+        `is_deleted`
+    </sql>
+
+    <insert id="batchInsert">
+        insert into baseline_job_job ( `baseline_job_id`, `task_id`,
+        `task_app_type`, `job_id`, `expect_start_time`, `estimated_exec_time`, `expect_end_time`,
+        `early_warning_start_time`, `early_warning_end_time`, `broken_line_start_time`,
+        `broken_line_end_time`, `baseline_task_type` , `is_deleted`
+        )
+        values
+        <foreach collection="jobJobs" item="jobJob" separator=",">
+            (#{jobJob.baselineJobId}, #{jobJob.taskId},#{jobJob.taskAppType}, #{jobJob.jobId},
+            #{jobJob.expectStartTime},
+            #{jobJob.estimatedExecTime},
+            #{jobJob.expectEndTime},
+            #{jobJob.earlyWarningStartTime},
+            #{jobJob.earlyWarningEndTime},
+            #{jobJob.brokenLineStartTime},
+            #{jobJob.brokenLineEndTime},
+            #{jobJob.baselineTaskType},
+            #{jobJob.isDeleted})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByBaselineJobIds">
+        DELETE FROM `baseline_job_job`
+        WHERE `is_deleted` = 0
+        AND `baseline_job_id` IN
+        <foreach collection="baselineJobIds" open="(" close=")" item="baselineJobId" separator=",">
+            #{baselineJobId}
+        </foreach>
+    </delete>
+
+    <select id="scanningBaselineJobJobByBaselineJobId" resultType="com.dtstack.engine.po.BaselineJobJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_job_job
+        WHERE `is_deleted` = 0
+        <if test="startId!=null">
+            AND id > #{startId}
+        </if>
+        AND `baseline_job_id` = #{baselineJobId}
+        ORDER BY `id`
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectJobIdByBaselineJobId" resultType="java.lang.String">
+        SELECT `job_id`
+        FROM baseline_job_job
+        WHERE `is_deleted` = 0
+        AND `baseline_job_id` = #{baselineJobId}
+        AND `is_deleted` = 0
+        <if test="baselineTaskType!=null">
+            AND `baseline_task_type` = #{baselineTaskType}
+        </if>
+    </select>
+
+    <select id="selectBaselineByBaselineJobId" resultType="com.dtstack.engine.po.BaselineJobJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_job_job
+        WHERE `is_deleted` = 0
+        AND `baseline_job_id` = #{baselineJobId}
+        AND `is_deleted` = 0
+        <if test="baselineTaskType!=null">
+            AND `baseline_task_type` = #{baselineTaskType}
+        </if>
+    </select>
+
+    <select id="selectBaselineByJobId" resultType="com.dtstack.engine.po.BaselineJobJob">
+        SELECT <include refid="Base_Column_List"/>
+        FROM baseline_job_job
+        WHERE `is_deleted` = 0
+        AND  `job_id` = #{jobId}
+    </select>
+
+
+</mapper>

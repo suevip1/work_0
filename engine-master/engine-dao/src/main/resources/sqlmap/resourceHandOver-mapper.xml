@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ResourceHandOverDao">
+
+
+    <select id="findByProjectIdAndOldResourceIds" resultType="com.dtstack.engine.po.ResourceHandOver">
+        SELECT
+        id, project_id, old_resource_id, target_resource_id,app_type
+        FROM console_resource_hand_over
+        WHERE project_id = #{projectId} AND app_type = #{appType}  AND old_resource_id in
+        <foreach collection="oldResourceIds" open="(" close=")" item="oldResourceId" separator=",">
+            #{oldResourceId}
+        </foreach>
+         AND is_deleted = 0
+    </select>
+
+    <update id="updateTargetResourceIdByProjectIdAndTargetResourceId">
+        update console_resource_hand_over
+        set target_resource_id = #{targetResourceId},
+            gmt_modified = now()
+        WHERE project_id = #{projectId} AND app_type = #{appType} AND
+              target_resource_id = #{oldResourceId} AND
+              is_deleted = 0
+    </update>
+
+    <update id="deleteByIds">
+        update console_resource_hand_over
+        SET is_deleted = 1
+        WHERE id IN
+        <foreach collection="ids" open="(" close=")" item="id" separator=",">
+            id
+        </foreach>
+    </update>
+
+    <update id="update">
+        update console_resource_hand_over
+        set
+            <if test="targetResourceId != null">
+                target_resource_id = #{targetResourceId},
+            </if>
+            <if test="oldResourceId != null">
+                old_resource_id = #{oldResourceId},
+            </if>
+            gmt_modified = now()
+        WHERE id = #{id} and is_deleted = 0
+    </update>
+
+    <insert id="insert">
+        insert into console_resource_hand_over
+        (project_id,app_type, old_resource_id, target_resource_id, gmt_create, gmt_modified, is_deleted) values
+        (#{projectId},#{appType},#{oldResourceId},#{targetResourceId},#{gmtCreate},#{gmtModified},#{isDeleted})
+    </insert>
+
+</mapper>

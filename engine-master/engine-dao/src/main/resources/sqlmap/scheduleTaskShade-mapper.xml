@@ -1,0 +1,1587 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskShadeDao">
+
+    <sql id="select_content_fragment">
+      id,tenant_id,task_id,project_id,node_pid,name,task_type,engine_type,compute_type,sql_text,task_params,schedule_conf,period_type,app_type,dtuic_tenant_id,
+      schedule_status,project_schedule_status,submit_status,gmt_create,gmt_modified,modify_user_id,create_user_id,owner_user_id,version_id,is_deleted,task_desc,main_class,exe_args,flow_id,is_publish_to_produce,task_rule,component_version,business_type,resource_id,job_build_type,task_group
+    </sql>
+
+    <sql id="select_content_fragment_with_sql">
+        id,tenant_id,task_id,project_id,node_pid,name,task_type,engine_type,compute_type,task_params,schedule_conf,period_type,app_type,dtuic_tenant_id,
+      schedule_status,project_schedule_status,submit_status,gmt_create,gmt_modified,modify_user_id,create_user_id,owner_user_id,version_id,is_deleted,task_desc,main_class,exe_args,flow_id,is_publish_to_produce,task_rule,component_version,business_type,resource_id,job_build_type,task_group
+    </sql>
+
+    <sql id="alias_select_content_fragment">
+        ts.id,ts.tenant_id,ts.task_id,ts.project_id,ts.node_pid,ts.name,ts.task_type,ts.app_type,ts.engine_type,ts.compute_type,ts.sql_text,ts.task_params,ts.schedule_conf,ts.period_type,
+        ts.schedule_status,ts.project_schedule_status,ts.submit_status,ts.gmt_create,ts.gmt_modified,ts.modify_user_id,ts.create_user_id,ts.owner_user_id,ts.version_id,ts.is_deleted,ts.task_desc,ts.main_class,ts.exe_args,ts.flow_id,ts.is_publish_to_produce,ts.dtuic_tenant_id,task_rule,component_version,ts.business_type,resource_id,ts.job_build_type,task_group
+    </sql>
+
+    <sql id="simple_select_content_fragment">
+        id,tenant_id,project_id,name,task_type,engine_type,compute_type,period_type,schedule_conf,task_id,app_type,
+        schedule_status,project_schedule_status,submit_status,gmt_create,gmt_modified,modify_user_id,create_user_id,owner_user_id,version_id,is_deleted,flow_id,is_publish_to_produce,dtuic_tenant_id,task_rule,component_version,business_type,resource_id,job_build_type,task_group
+    </sql>
+
+    <sql id="select_where_fragment">
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="model.id != null and model.id > 0">
+                AND id = #{model.id}
+            </if>
+            <if test="model.tenantId != null">
+                AND tenant_id = #{model.tenantId}
+            </if>
+
+            <if test="model.dtuicTenantId != null and model.dtuicTenantId != 0">
+                AND dtuic_tenant_id = #{model.dtuicTenantId}
+            </if>
+            <if test="model.projectId != null">
+                AND project_id = #{model.projectId}
+            </if>
+            <if test="model.nodePid != null">
+                AND node_pid = #{model.nodePid}
+            </if>
+            <if test="model.name != null">
+                AND name = #{model.name}
+            </if>
+            <if test="model.taskType != null">
+                AND task_type = #{model.taskType}
+            </if>
+            <if test="model.engineType != null">
+                AND engine_type = #{model.engineType}
+            </if>
+            <if test="model.computeType != null">
+                AND compute_type = #{model.computeType}
+            </if>
+            <if test="model.sqlText != null">
+                AND sql_text = #{model.sqlText}
+            </if>
+            <if test="model.taskParams != null">
+                AND task_params = #{model.taskParams}
+            </if>
+            <if test="model.scheduleConf != null">
+                AND schedule_conf = #{model.scheduleConf}
+            </if>
+            <if test="model.periodType != null">
+                AND period_type = #{model.periodType}
+            </if>
+            <if test="model.scheduleStatus != null">
+                AND schedule_status = #{model.scheduleStatus}
+            </if>
+            <if test="model.submitStatus != null">
+                AND submit_status = #{model.submitStatus}
+            </if>
+            <if test="model.gmtCreate != null">
+                AND gmt_create = #{model.gmtCreate}
+            </if>
+            <if test="model.gmtModified != null">
+                AND gmt_modified = #{model.gmtModified}
+            </if>
+            <if test="model.modifyUserId != null">
+                AND modify_user_id = #{model.modifyUserId}
+            </if>
+            <if test="model.createUserId != null">
+                AND create_user_id = #{model.createUserId}
+            </if>
+            <if test="model.ownerUserId != null">
+                AND owner_user_id = #{model.ownerUserId}
+            </if>
+            <if test="@org.apache.commons.collections.CollectionUtils@isNotEmpty(model.ownerUserIds)">
+                AND owner_user_id IN
+                <foreach item="item" index="index" collection="model.ownerUserIds" open="(" separator="," close=")">
+                    #{item, jdbcType=BIGINT}
+                </foreach>
+            </if>
+            <if test="model.versionId != null">
+                AND version_id = #{model.versionId}
+            </if>
+            <if test="model.jobBuildType != null">
+                AND job_build_type = #{model.jobBuildType}
+            </if>
+            <if test="model.isDeleted != null">
+                AND is_deleted = #{model.isDeleted}
+            </if>
+            <if test="model.taskDesc != null">
+                AND task_desc = #{model.taskDesc}
+            </if>
+            <if test="model.mainClass != null">
+                AND main_class = #{model.mainClass}
+            </if>
+            <if test="model.exeArgs != null">
+                AND exe_args = #{model.exeArgs}
+            </if>
+            <choose>
+                <when test="model.fuzzName != null and  model.searchType==1" >
+                    AND name LIKE CONCAT('%',#{model.fuzzName},'%')
+                </when>
+                <when test="model.fuzzName != null and  model.searchType==2" >
+                    AND name =#{model.fuzzName}
+                </when>
+                <when test="model.fuzzName != null and  model.searchType==3" >
+                    AND name LIKE CONCAT(#{model.fuzzName},'%')
+                </when>
+                <when test="model.fuzzName != null and  model.searchType==4" >
+                    AND name LIKE CONCAT('%',#{model.fuzzName})
+                </when>
+            </choose>
+            <if test="model.startGmtModified != null">
+                AND gmt_modified &gt;= #{model.startGmtModified}
+            </if>
+
+            <if test="model.endGmtModified != null">
+                AND gmt_modified &lt;= #{model.endGmtModified}
+            </if>
+            <if test="model.taskTypeList != null and model.taskTypeList.size() >0">
+                AND task_type IN
+                <foreach item="taskType" index="index" collection="model.taskTypeList" open="(" separator="," close=")">
+                    #{taskType}
+                </foreach>
+            </if>
+
+            <if test="model.periodTypeList != null and model.periodTypeList.size() >0">
+                AND period_type IN
+                <foreach item="periodType" index="index" collection="model.periodTypeList" open="(" separator="," close=")">
+                    #{periodType}
+                </foreach>
+            </if>
+            <if test="model.flowId != null">
+                AND flow_id = #{model.flowId}
+            </if>
+            <if test="model.appType != null">
+                AND app_type = #{model.appType}
+            </if>
+            <if test="model.businessType != null">
+                AND business_type = #{model.businessType}
+            </if>
+            <if test="model.businessType != null">
+                AND business_type = #{model.businessType}
+            </if>
+            <if test="model.resourceIds != null and model.resourceIds.size()>0">
+                AND resource_id IN
+                <foreach collection="model.resourceIds" separator="," index="index" item="item" open="(" close=")">
+                    ${item}
+                </foreach>
+            </if>
+            <if test="model.queryTaskIds != null and model.queryTaskIds.size() >0">
+                AND task_id IN
+                <foreach item="taskId" index="index" collection="model.queryTaskIds" open="(" separator="," close=")">
+                    #{taskId}
+                </foreach>
+            </if>
+        </trim>
+    </sql>
+
+    <sql id="update_fragment">
+        <set>
+            <if test="tenantId != null and tenantId > 0">
+                tenant_id = #{tenantId},
+            </if>
+            <if test="projectId != null and projectId > 0">
+                project_id = #{projectId},
+            </if>
+            <if test="nodePid != null">
+                node_pid = #{nodePid},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="taskType != null">
+                task_type = #{taskType},
+            </if>
+            <if test="engineType != null">
+                engine_type = #{engineType},
+            </if>
+            <if test="computeType != null">
+                compute_type = #{computeType},
+            </if>
+            <if test="sqlText != null">
+                sql_text = #{sqlText},
+            </if>
+            <if test="taskParams != null">
+                task_params = #{taskParams},
+            </if>
+            <if test="scheduleConf != null">
+                schedule_conf = #{scheduleConf},
+            </if>
+            <if test="periodType != null">
+                period_type = #{periodType},
+            </if>
+            <if test="scheduleStatus != null">
+                schedule_status = #{scheduleStatus},
+            </if>
+            <if test="submitStatus != null">
+                submit_status = #{submitStatus},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified},
+            </if>
+            <if test="modifyUserId != null">
+                modify_user_id = #{modifyUserId},
+            </if>
+            <if test="createUserId != null">
+                create_user_id = #{createUserId},
+            </if>
+            <if test="ownerUserId != null">
+                owner_user_id = #{ownerUserId},
+            </if>
+            <if test="versionId != null">
+                version_id = #{versionId},
+            </if>
+            <if test="isDeleted != null">
+                is_deleted = #{isDeleted},
+            </if>
+            <if test="taskDesc != null">
+                task_desc = #{taskDesc},
+            </if>
+            <if test="mainClass != null">
+                main_class = #{mainClass},
+            </if>
+            <if test="exeArgs != null">
+                exe_args = #{exeArgs},
+            </if>
+            <if test="isPublishToProduce != null">
+                is_publish_to_produce = #{isPublishToProduce},
+            </if>
+            <if test="dtuicTenantId !=null and dtuicTenantId > 0">
+                dtuic_tenant_id  = #{dtuicTenantId},
+            </if>
+            <if test="flowId !=null">
+                flow_id  = #{flowId},
+            </if>
+            <if test="projectScheduleStatus != null">
+                project_schedule_status = #{projectScheduleStatus},
+            </if>
+            <if test="taskRule != null">
+                task_rule = #{taskRule},
+            </if>
+            <if test="componentVersion != null and componentVersion != '' ">
+                component_version = #{componentVersion},
+            </if>
+            <if test="businessType!=null">
+                business_type = #{businessType},
+            </if>
+            <if test="resourceId!=null">
+                resource_id = #{resourceId},
+            </if>
+            <if test="jobBuildType!=null">
+                job_build_type = #{jobBuildType},
+            </if>
+        </set>
+    </sql>
+
+    <update id="deleteTombstoneByTaskIds">
+        UPDATE schedule_task_shade
+        SET is_deleted = 1 , gmt_modified = NOW()
+        WHERE `task_id` IN
+        <foreach collection="taskIds" open="(" close=")" item="taskId" separator=",">
+            #{taskId}
+        </foreach>
+        AND `app_type` = #{appType}
+    </update>
+
+    <select id="getOne" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE task_id = #{taskId} AND is_deleted = 0 and app_type = #{appType} LIMIT 1
+    </select>
+
+    <select id="getOneIncludeDelete" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE task_id = #{taskId} and app_type = #{appType} LIMIT 1
+    </select>
+
+    <select id="listTaskByStatus" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment_with_sql"/>
+        FROM schedule_task_shade
+        WHERE id > #{startId} AND submit_status = #{submitStatus} and project_schedule_status = #{projectScheduleStatus} and is_deleted = 0
+        <if test="taskGroup!=null">
+            AND task_group = #{taskGroup}
+        </if>
+        <if test="appType != null">
+            and app_type = #{appType}
+        </if>
+        <if test="projectIds != null and projectIds.size() > 0">
+            and   project_id in
+            <foreach collection="projectIds" open="(" separator="," close=")" item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+        order by id asc
+        limit #{batchTaskSize}
+    </select>
+
+    <select id="countTaskByStatus" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM schedule_task_shade
+        WHERE submit_status = #{submitStatus} and project_schedule_status = #{projectScheduleStatus} and is_deleted = 0
+        <if test="taskGroup!=null">
+            AND task_group = #{taskGroup}
+        </if>
+        <if test="appType != null">
+            and app_type = #{appType}
+        </if>
+        <if test="projectIds != null and projectIds.size() > 0">
+            and   project_id in
+            <foreach collection="projectIds" open="(" separator="," close=")" item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="listByTaskIds" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        <where>
+            <if test="appType != null">
+                AND app_type = #{appType}
+            </if>
+            <if test="isDeleted != null">
+                AND is_deleted = #{isDeleted}
+            </if>
+
+            <if test="taskIds !=null and taskIds.size() != 0">
+                AND task_id IN
+                <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+
+    <select id="listByTaskNames" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        <where>
+            <if test="appType != null">
+                AND app_type = #{appType}
+            </if>
+            <if test="projectId != null">
+                AND project_id = #{projectId}
+            </if>
+
+            <if test="taskNames !=null and taskNames.size() != 0">
+                AND name IN
+                <foreach item="name" index="index" collection="taskNames" open="(" separator="," close=")">
+                    #{name}
+                </foreach>
+            </if>
+            AND is_deleted = 0
+        </where>
+
+    </select>
+
+    <select id="listByNameLike" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE is_deleted = 0 and app_type = #{appType}
+        <if test="ownerId!=null">
+           AND owner_user_id = #{ownerId}
+        </if>
+        <if test="name!=null">
+            AND name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="projectId != null">
+            and  project_id = #{projectId}
+        </if>
+        <if test="projectIds != null and projectIds.size() > 0">
+            and   project_id in
+            <foreach collection="projectIds" open="(" separator="," close=")" item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="listByNameLikeWithSearchType" resultType="ScheduleTaskShade">
+        SELECT
+            id,
+            tenant_id,
+            task_id,
+            project_id,
+            node_pid,
+            name,
+            task_type,
+            engine_type,
+            compute_type,
+            task_params,
+            schedule_conf,
+            period_type,
+            app_type,
+            dtuic_tenant_id,
+            schedule_status,
+            project_schedule_status,
+            submit_status,
+            gmt_create,
+            gmt_modified,
+            modify_user_id,
+            create_user_id,
+            owner_user_id,
+            version_id,
+            is_deleted,
+            task_desc,
+            main_class,
+            exe_args,
+            flow_id,
+            is_publish_to_produce,
+            task_rule,
+            component_version,
+            business_type,
+            resource_id
+        FROM schedule_task_shade t
+        INNER JOIN (
+        SELECT
+        id
+        FROM schedule_task_shade
+        WHERE is_deleted = 0 and app_type = #{appType}
+        <if test="ownerId!=null">
+            AND owner_user_id = #{ownerId}
+        </if>
+        <choose>
+            <when test="name != null and  searchType==1">
+                AND name LIKE CONCAT('%',#{name},'%')
+            </when>
+            <when test="name != null and  searchType==2">
+                AND name =#{name}
+            </when>
+            <when test="name != null and  searchType==3">
+                AND name LIKE CONCAT(#{name},'%')
+            </when>
+            <when test="name != null and  searchType==4">
+                AND name LIKE CONCAT('%',#{name})
+            </when>
+        </choose>
+        <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+        <if test="projectIds != null and projectIds.size() > 0">
+            and project_id in
+            <foreach collection="projectIds" open="(" separator="," close=")" item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+        <if test="componentVersions != null and componentVersions.size() > 0">
+            and component_version in
+            <foreach collection="componentVersions" open="(" separator="," close=")" item="componentVersion">
+                #{componentVersion}
+            </foreach>
+        </if>
+        <if test="computeType != null">
+            and compute_type = #{computeType}
+        </if>
+        ) as tmp using(id)
+    </select>
+
+    <select id="getByName" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE project_id = #{projectId} AND name = #{name}
+        AND app_type = #{appType}
+        and is_deleted = 0
+        <if test="flowId != null">
+            AND flow_id = #{flowId}
+        </if>
+        limit 1
+    </select>
+
+
+    <select id="listDependencyTask" resultType="java.util.Map">
+        SELECT ts.task_id as id ,ts.task_id,ts.name,ts.create_user_id as createUserId
+        FROM schedule_task_shade ts
+        WHERE ts.project_id = #{projectId} and ts.submit_status = 1
+        and ts.task_id NOT IN
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and ts.name like concat('%', #{name}, '%') and ts.is_deleted = 0 and ts.flow_id = 0
+    </select>
+
+    <select id="listByTaskIdsNotIn" resultType="java.util.Map">
+        SELECT ts.task_id as id, ts.task_id, ts.task_type as taskType,ts.name,ts.create_user_id as createUserId
+        FROM schedule_task_shade ts
+        WHERE ts.project_id = #{projectId} and ts.submit_status = 1
+        and ts.compute_type = 1 and ts.task_type in (0,2) and ts.is_deleted = 0
+        <if test="taskIds != null and taskIds.size()>0 ">
+            and ts.task_id NOT IN
+            <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <update id="updateTaskName">
+        UPDATE
+            schedule_task_shade
+        set name = #{name}
+        where task_id = #{taskId} and app_type = #{appType}
+    </update>
+
+    <update id="delete">
+        UPDATE schedule_task_shade
+        SET is_deleted = 1, modify_user_id = #{userId}, gmt_modified = NOW()
+        WHERE task_id = #{taskId} AND app_type = #{appType}
+    </update>
+
+    <insert id="insert" parameterType="ScheduleTaskShade" useGeneratedKeys="false" keyProperty="id">
+        INSERT IGNORE INTO schedule_task_shade
+        (tenant_id,project_id,node_pid,name,task_type,engine_type,compute_type,sql_text,task_params,schedule_conf,period_type,
+         schedule_status,submit_status,gmt_create,gmt_modified,modify_user_id,create_user_id,owner_user_id,version_id,is_deleted,task_desc,main_class,exe_args,flow_id,app_type,dtuic_tenant_id,task_id,project_schedule_status,task_rule,component_version,business_type,resource_id,job_build_type,task_group)
+        VALUES
+        (#{tenantId},#{projectId},#{nodePid},#{name},#{taskType},#{engineType},#{computeType},#{sqlText},#{taskParams},#{scheduleConf},#{periodType},
+         #{scheduleStatus},#{submitStatus},#{gmtCreate},#{gmtModified},#{modifyUserId},#{createUserId},#{ownerUserId},#{versionId},#{isDeleted},#{taskDesc},#{mainClass},#{exeArgs},#{flowId},#{appType},#{dtuicTenantId},#{taskId},#{projectScheduleStatus},#{taskRule},#{componentVersion},#{businessType},#{resourceId},#{jobBuildType},#{taskGroup})
+    </insert>
+
+    <update id="update" parameterType="ScheduleTaskShade">
+        UPDATE
+        schedule_task_shade
+        <include refid="update_fragment"/>
+        WHERE
+        task_id = #{taskId} and app_type = #{appType}
+    </update>
+
+    <select id="listByType" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE project_id = #{projectId} and task_type = #{type}
+        <if test="taskName != null">
+            and name like '%${taskName}%'
+        </if>
+        and  is_deleted = 0
+    </select>
+
+    <select id="generalQuery" parameterType="com.dtstack.engine.api.pager.PageQuery" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_shade
+        <include refid="select_where_fragment"/>
+        <if test="orderBy != null and sort != null">
+            order by ${orderBy} ${sort}
+        </if>
+        <if test="orderBy != null and sort == null">
+            order by ${orderBy} desc
+        </if>
+        <if test="start != null and pageSize != null">
+            limit #{start} , #{pageSize}
+        </if>
+        <if test="start == null and pageSize != null">
+            limit #{pageSize}
+        </if>
+        <if test="start == null and pageSize == null">
+            limit 1000
+        </if>
+    </select>
+
+    <select id="generalCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM schedule_task_shade
+        <include refid="select_where_fragment"/>
+        limit 1
+    </select>
+
+    <update id="batchUpdateTaskScheduleStatus">
+        UPDATE
+        schedule_task_shade
+        set schedule_status = #{scheduleStatus}
+        WHERE
+        task_id in
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND app_type = #{appType}
+        AND is_deleted = 0
+    </update>
+
+    <select id="simpleQuery" parameterType="com.dtstack.engine.api.pager.PageQuery" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        where tenant_id = #{model.tenantId} and project_id = #{model.projectId}
+        <if test="model.taskGroup!=null">
+            AND task_group = #{model.taskGroup}
+        </if>
+        <if test="model.taskName != null">
+            and name like CONCAT('%',#{model.taskName},'%')
+        </if>
+        <if test="model.startTime != null">
+            and to_days(gmt_modified) >= to_days(#{model.startTime})
+        </if>
+        <if test="model.taskType != null">
+            and task_type = #{model.taskType}
+        </if>
+        <if test="model.endTime != null">
+            and to_days(#{model.endTime}) >= to_days(gmt_modified)
+        </if>
+        <if test="model.taskTypeList != null and model.taskTypeList.size()>0">
+            AND task_type IN
+            <foreach collection="model.taskTypeList" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.queryTaskIds != null and model.queryTaskIds.size()>0">
+            AND task_id IN
+            <foreach collection="model.queryTaskIds" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.name != null">
+            and name like CONCAT('%',#{model.name},'%')
+        </if>
+        <if test="model.periodTypeList != null and model.periodTypeList.size()>0">
+            AND period_type IN
+            <foreach collection="model.periodTypeList" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.modifyUserId != null">
+            AND modify_user_id = #{model.modifyUserId}
+        </if>
+        <if test="model.createUserId != null">
+            AND create_user_id = #{model.createUserId}
+        </if>
+        <if test="model.ownerUserId != null">
+            AND owner_user_id = #{model.ownerUserId}
+        </if>
+        <!--  判断 pythonVersion  -->
+        <if test="model.pythonVersion != null">
+            AND  (exe_args IS NOT NULL AND JSON_VALID(exe_args))
+            AND JSON_EXTRACT(exe_args, '$."--python-version"') = #{model.pythonVersion}
+        </if>
+        <choose>
+            <when test="model.ignorePublish != null and model.ignorePublish == 1">
+                and is_deleted = 0
+            </when>
+            <otherwise>
+                and if(is_publish_to_produce = 0, is_deleted = 0,1=1)
+            </otherwise>
+        </choose>
+        and flow_id = 0
+        <if test="orderBy != null and sort != null">
+            order by ${orderBy} ${sort}
+        </if>
+        <if test="orderBy != null and sort == null">
+            order by ${orderBy} desc
+        </if>
+        <if test="start != null and pageSize != null">
+            limit #{start} , #{pageSize}
+        </if>
+        <if test="start == null and pageSize != null">
+            limit #{pageSize}
+        </if>
+        <if test="start == null and pageSize == null">
+            limit 1000
+        </if>
+    </select>
+
+    <select id="simpleCount" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM schedule_task_shade
+        where tenant_id = #{model.tenantId} and project_id = #{model.projectId}
+        <if test="model.taskGroup!=null">
+            AND task_group = #{model.taskGroup}
+        </if>
+        <if test="model.taskName != null">
+            and name like CONCAT('%',#{model.taskName},'%')
+        </if>
+        <if test="model.startTime != null">
+            and to_days(gmt_modified) >= to_days(#{model.startTime})
+        </if>
+        <if test="model.taskType != null">
+            and task_type = #{model.taskType}
+        </if>
+        <if test="model.appType != null">
+            and app_type = #{model.appType}
+        </if>
+        <if test="model.endTime != null">
+            and to_days(#{model.endTime}) >= to_days(gmt_modified)
+        </if>
+        <if test="model.taskTypeList != null and model.taskTypeList.size()>0">
+            AND task_type IN
+            <foreach collection="model.taskTypeList" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.queryTaskIds != null and model.queryTaskIds.size()>0">
+            AND task_id IN
+            <foreach collection="model.queryTaskIds" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.name != null">
+            and name like CONCAT('%',#{model.name},'%')
+        </if>
+        <if test="model.periodTypeList != null and model.periodTypeList.size()>0">
+            AND period_type IN
+            <foreach collection="model.periodTypeList" separator="," index="index" item="item" open="(" close=")">
+                ${item}
+            </foreach>
+        </if>
+        <if test="model.name != null">
+            and name like CONCAT('%',#{model.name},'%')
+        </if>
+        <if test="model.modifyUserId != null">
+            AND modify_user_id = #{model.modifyUserId}
+        </if>
+        <if test="model.createUserId != null">
+            AND create_user_id = #{model.createUserId}
+        </if>
+        <if test="model.ownerUserId != null">
+            AND owner_user_id = #{model.ownerUserId}
+        </if>
+        <!--  判断 pythonVersion  -->
+        <if test="model.pythonVersion != null">
+            AND  (exe_args IS NOT NULL AND JSON_VALID(exe_args))
+            AND JSON_EXTRACT(exe_args, '$."--python-version"') = #{model.pythonVersion}
+        </if>
+
+        <choose>
+            <when test="model.ignorePublish != null and model.ignorePublish == 1">
+                and is_deleted = 0
+            </when>
+            <otherwise>
+                and if(is_publish_to_produce = 0, is_deleted = 0,1=1)
+            </otherwise>
+        </choose>
+        and flow_id = 0    </select>
+
+    <select id="countTaskByType" resultType="com.dtstack.engine.api.vo.schedule.task.shade.ScheduleTaskShadeCountTaskVO">
+        select
+        count(1) as deployCount,
+        project_id AS projectId
+        from
+        schedule_task_shade
+        where
+        tenant_id = #{tenantId}
+        and
+        dtuic_tenant_id = #{dtuicTenantId}
+        and
+        app_type = #{appType}
+        <if test="flowId != null">
+          and flow_id = #{flowId}
+        </if>
+        <if test="taskTypes != null and taskTypes.size() > 0 ">
+            and task_type in
+            <foreach collection="taskTypes" separator="," open="(" close=")" item="taskType">
+                #{taskType}
+            </foreach>
+        </if>
+        <if test="projectIds != null and projectIds.size() > 0 ">
+            and project_id in
+            <foreach collection="projectIds" separator="," open="(" close=")" item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+        GROUP BY project_id
+    </select>
+
+
+    <update id="updatePublishStatus" parameterType="java.util.List">
+        update schedule_task_shade set is_publish_to_produce = #{status}
+        where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countPublishToProduce" resultType="java.lang.Integer">
+        select count(1) from schedule_task_shade where
+        project_id = #{projectId} and app_type = #{appType}
+        and is_publish_to_produce = 1 and is_deleted = 0
+    </select>
+
+    <select id="listSimpleTaskByTaskIds" resultType="com.dtstack.engine.dto.ScheduleTaskForFillDataDTO">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE
+        1 = 1
+        <if test="isDeleted != null">
+            AND is_deleted = #{isDeleted}
+        </if>
+
+        <if test="taskIds !=null and taskIds.size() != 0">
+            AND task_id IN
+            <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        and app_type = #{appType}
+    </select>
+
+    <select id="getSqlTextById" resultType="java.lang.String">
+        SELECT
+        sql_text
+        FROM schedule_task_shade
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="getWorkFlowTopNode" resultType="ScheduleTaskShade">
+        SELECT
+            <include refid="alias_select_content_fragment"/>
+        FROM
+            schedule_task_shade ts
+            LEFT JOIN ( SELECT DISTINCT task_id
+            FROM schedule_task_task_shade WHERE task_id IN
+            ( SELECT task_id FROM schedule_task_shade
+            WHERE flow_id = #{workFlowId} and is_deleted = 0 and app_type = #{appType} )
+            and is_deleted = 0 and app_type = #{appType}) tts ON ts.task_id = tts.task_id
+        WHERE
+            ts.flow_id = #{workFlowId}
+            AND tts.task_id IS NULL
+            and ts.is_deleted = 0
+            and ts.app_type = #{appType}
+            limit 1
+    </select>
+
+    <select id="listSimpleByTaskIds" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE
+        app_type = #{appType}
+        <if test="isDeleted != null">
+            AND is_deleted = #{isDeleted}
+        </if>
+
+        <if test="taskIds !=null and taskIds.size() != 0">
+            AND task_id IN
+            <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getOneWithDeleted" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM
+        schedule_task_shade
+        where task_id = #{taskId}
+        AND app_type  = #{appType}
+        <if test="isDeleted != null">
+            AND is_deleted = #{isDeleted}
+        </if>
+        LIMIT 1
+    </select>
+
+
+    <update id="updateTaskExtInfo">
+        UPDATE
+            schedule_task_shade
+        set extra_info = #{extraInfo},gmt_modified = NOW()
+        where task_id = #{taskId} and app_type = #{appType} and is_deleted = 0
+    </update>
+
+    <select id="getExtInfoByTaskId" resultType="java.lang.String">
+        SELECT
+            extra_info
+        FROM schedule_task_shade
+        where task_id = #{taskId} and app_type = #{appType} and is_deleted = 0
+    </select>
+
+    <select id="getExtInfoByTaskIdIncludeDelete" resultType="java.lang.String">
+        SELECT
+        extra_info
+        FROM schedule_task_shade
+        where task_id = #{taskId} and app_type = #{appType}
+    </select>
+
+    <select id="findFuzzyTaskNameByCondition" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM `schedule_task_shade`
+        WHERE  `app_type` = #{appType} AND is_deleted = 0 AND flow_id = 0
+        <if test="uicTenantId!=null">
+            AND `dtuic_tenant_id` = #{uicTenantId}
+        </if>
+        <if test="tenantIds!=null and tenantIds.size != 0">
+            AND `dtuic_tenant_id` IN
+            <foreach collection="tenantIds" open="(" close=")" separator="," item="tenantId">
+                #{tenantId}
+            </foreach>
+        </if>
+        <if test="projectIds !=null and projectIds.size !=0">
+            AND `project_id` IN
+            <foreach collection="projectIds" open="(" close=")" separator="," item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+        <if test="projectScheduleStatus !=null">
+            AND `project_schedule_status` = #{projectScheduleStatus}
+        </if>
+        <if test="name !=null">
+            AND `name` LIKE CONCAT('%',#{name},'%')
+        </if>
+        order by name
+        LIMIT #{fuzzyProjectByProjectAliasLimit}
+    </select>
+
+
+    <select id="getExtInfoByTaskIds" resultType="ScheduleTaskShade">
+        SELECT
+           task_id ,extra_info
+        FROM schedule_task_shade
+        where task_id IN
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          and app_type = #{appType} and is_deleted = 0
+    </select>
+
+    <select id="listNameByIds" resultType="com.dtstack.engine.dto.TaskName">
+        SELECT
+        id, `name`
+        FROM
+        schedule_task_shade
+        where id in
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach> and is_deleted = 0
+    </select>
+
+    <select id="listByIds" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM
+        schedule_task_shade
+        where id in
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach> and is_deleted = 0
+    </select>
+
+    <select id="getById" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM
+        schedule_task_shade
+        where id = #{id} and is_deleted = 0
+    </select>
+
+    <select id="getChildTaskByOtherPlatform" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            t.id,
+            t.tenant_id,
+            t.project_id,
+            t.name,
+            t.task_type,
+            t.engine_type,
+            t.compute_type,
+            t.period_type,
+            t.schedule_conf,
+            t.task_id,
+            t.app_type,
+            t.schedule_status,
+            t.project_schedule_status,
+            t.submit_status,
+            t.gmt_create,
+            t.gmt_modified,
+            t.modify_user_id,
+            t.create_user_id,
+            t.owner_user_id,
+            t.version_id,
+            t.is_deleted,
+            t.flow_id,
+            t.is_publish_to_produce,
+            t.dtuic_tenant_id,
+            t.task_rule,
+            t.resource_id,
+            t.job_build_type
+        FROM `schedule_task_shade` t
+        LEFT JOIN `schedule_task_task_shade`  tt
+        ON t.task_id = tt.task_id and t.app_type = tt.app_type and tt.is_deleted = 0
+        WHERE t.is_deleted = 0 and tt.parent_task_id = #{taskId} AND tt.parent_app_type = #{appType}
+        LIMIT #{limit}
+    </select>
+
+    <select id="getTaskOtherPlatformByProjectId" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            id,
+            tenant_id,
+            project_id,
+            name,
+            task_type,
+            engine_type,
+            compute_type,
+            period_type,
+            schedule_conf,
+            task_id,
+            app_type,
+            schedule_status,
+            project_schedule_status,
+            submit_status,
+            gmt_create,
+            gmt_modified,
+            modify_user_id,
+            create_user_id,
+            owner_user_id,
+            version_id,
+            is_deleted,
+            flow_id,
+            is_publish_to_produce,
+            dtuic_tenant_id,
+            task_rule,
+            resource_id,
+            job_build_type
+        FROM schedule_task_shade
+        WHERE id IN (
+            SELECT
+            DISTINCT t.id
+            FROM `schedule_task_shade` t
+            LEFT JOIN `schedule_task_task_shade`  tt
+            ON  t.task_id = tt.parent_task_id AND t.app_type = tt.parent_app_type
+            WHERE t.is_deleted = 0  AND tt.is_deleted = 0 AND t.project_id = #{projectId}  AND tt.parent_app_type = #{appType} AND t.app_type = #{appType}
+        )
+        LIMIT #{limit}
+    </select>
+
+    <select id="listTaskRuleTask" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            t.id,
+            t.tenant_id,
+            t.project_id,
+            t.name,
+            t.task_type,
+            t.engine_type,
+            t.compute_type,
+            t.period_type,
+            t.schedule_conf,
+            t.task_id,
+            t.app_type,
+            t.schedule_status,
+            t.project_schedule_status,
+            t.submit_status,
+            t.gmt_create,
+            t.gmt_modified,
+            t.modify_user_id,
+            t.create_user_id,
+            t.owner_user_id,
+            t.version_id,
+            t.is_deleted,
+            t.flow_id,
+            t.is_publish_to_produce,
+            t.dtuic_tenant_id,
+            t.task_rule,
+            t.resource_id,
+            t.task_group,
+            t.job_build_type
+        FROM `schedule_task_shade` t
+        LEFT JOIN `schedule_task_task_shade`  tt
+        ON  t.task_id = tt.task_id AND t.app_type = tt.app_type  AND tt.is_deleted = 0
+        WHERE t.is_deleted = 0 AND tt.parent_app_type = #{appType} AND tt.parent_task_id = #{taskId}
+    </select>
+
+    <select id="listByUicTenantId" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            dtuic_tenant_id,
+            project_id
+        FROM schedule_task_shade
+        WHERE
+        dtuic_tenant_id IN
+        <foreach item="tenantId" collection="tenantIds" open="(" separator="," close=")">
+            #{tenantId}
+        </foreach>
+        AND app_type = #{appType}
+        and is_deleted = 0
+        GROUP BY project_id
+    </select>
+
+    <update id="updateProjectScheduleStatus">
+        update schedule_task_shade
+        set project_schedule_status = #{scheduleStatus}
+        where project_id = #{projectId} and app_type = #{appType}
+    </update>
+
+    <select id="getOneByTaskIdAndAppType" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="select_content_fragment"/>,extra_info
+        FROM schedule_task_shade
+        WHERE task_id = #{taskId} AND is_deleted = 0 and app_type = #{appType} LIMIT 1
+    </select>
+
+    <select id="findTaskKeyByProjectId" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            `task_id`,`app_type`,`schedule_status`
+        FROM schedule_task_shade
+        WHERE `project_id` = #{projectId} AND is_deleted = 0 and app_type = #{appType} and task_group = #{taskGroup}
+        <if test="taskTypes !=null and taskTypes.size !=0">
+            and `task_type` IN
+            <foreach collection="taskTypes" open="(" close=")" item="taskType" separator="," >
+                #{taskType}
+            </foreach>
+        </if>
+        <if test="taskIds !=null and taskIds.size !=0">
+            and `task_id` IN
+            <foreach collection="taskIds" open="(" close=")" item="taskId" separator="," >
+                #{taskId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="listByFindTask" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM `schedule_task_shade`
+        WHERE  `app_type` = #{findTaskVO.appType} AND is_deleted = 0 AND flow_id = 0
+        <if test="findTaskVO.taskGroup!=null">
+            AND task_group = #{findTaskVO.taskGroup}
+        </if>
+        <if test="findTaskVO.uicTenantId!=null">
+            AND `dtuic_tenant_id` = #{findTaskVO.uicTenantId}
+        </if>
+        <if test="findTaskVO.name !=null">
+            AND id IN (SELECT id FROM schedule_task_shade WHERE `name` LIKE CONCAT('%',#{findTaskVO.name},'%'))
+        </if>
+        <if test="findTaskVO.projectScheduleStatus !=null">
+            AND `project_schedule_status` = #{findTaskVO.projectScheduleStatus}
+        </if>
+        <if test="findTaskVO.currentProjectId!=null">
+            AND `project_id` = #{findTaskVO.currentProjectId}
+        </if>
+        <if test="findTaskVO.periodTypes!=null and findTaskVO.periodTypes.size > 0">
+            AND `period_type` IN
+            <foreach collection="findTaskVO.periodTypes" separator="," item="periodType" close=")" open="(">
+                #{periodType}
+            </foreach>
+        </if>
+        <if test="findTaskVO.projectId!=null">
+            AND `project_id` = #{findTaskVO.projectId}
+        </if>
+        <if test="findTaskVO.projectIds !=null and findTaskVO.projectIds.size !=0">
+            AND `project_id` IN
+            <foreach collection="findTaskVO.projectIds" open="(" close=")" separator="," item="projectId">
+                #{projectId}
+            </foreach>
+        </if>
+        <if test="findTaskVO.userIds!=null and findTaskVO.userIds.size != 0">
+            AND `dtuic_tenant_id` IN
+            <foreach collection="findTaskVO.userIds" open="(" close=")" separator="," item="userId">
+                #{userId}
+            </foreach>
+        </if>
+        order by name
+        LIMIT #{findTaskVO.limit}
+    </select>
+
+    <update id="updateResourceIdByProjectIdAndOldResourceId">
+        update schedule_task_shade set resource_id = #{resourceId}, gmt_modified = now()
+        where project_id = #{projectId} and resource_id = #{oldResourceId} and is_deleted = 0 and app_type = #{appType};
+    </update>
+
+
+    <update id="updateResourceByTaskIds">
+        update schedule_task_shade set resource_id = #{resourceId}, gmt_modified = now()
+        where dtuic_tenant_id = #{dtuicTenantId} and is_deleted = 0
+        and task_id in
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and app_type = #{appType};
+    </update>
+
+    <select id="listByIdsAndTaskName" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        id,
+        tenant_id,
+        project_id,
+        name,
+        task_type,
+        engine_type,
+        compute_type,
+        period_type,
+        schedule_conf,
+        task_id,
+        app_type,
+        schedule_status,
+        project_schedule_status,
+        submit_status,
+        gmt_create,
+        gmt_modified,
+        modify_user_id,
+        create_user_id,
+        owner_user_id,
+        version_id,
+        is_deleted,
+        flow_id,
+        is_publish_to_produce,
+        dtuic_tenant_id,
+        task_rule,
+        resource_id,
+        job_build_type
+        FROM schedule_task_shade
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND is_deleted = 0
+        <if test="taskName !=null and taskName != ''">
+            AND name LIKE '%${taskName}%'
+        </if>
+    </select>
+
+
+    <update id="deleteByFlowId">
+        UPDATE schedule_task_shade
+        SET is_deleted = 1, modify_user_id = #{userId}, gmt_modified = NOW()
+        WHERE flow_id = #{flowId} AND app_type = #{appType}
+    </update>
+
+    <update id="updateScheduleConf">
+        UPDATE schedule_task_shade
+        SET schedule_conf = #{scheduleConf}, modify_user_id = #{modifyUserId}, gmt_modified = NOW(),period_type = #{periodType}
+        WHERE app_type = #{appType}
+        <if test="taskIds !=null and taskIds.size() != 0">
+            AND task_id IN
+            <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+
+    <select id="getTasksByFlowId" resultType="ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE flow_id = #{flowId} AND is_deleted = 0 and app_type = #{appType}
+    </select>
+
+    <update id="changeTaskVersion">
+        update schedule_task_shade set component_version = #{targetVersion}, gmt_modified = now()
+        where is_deleted = 0 AND
+        dtuic_tenant_id IN
+        <foreach item="tenantId" collection="dtuicTenantIds" open="(" separator="," close=")">
+            #{tenantId}
+        </foreach>
+        <if test="appType!=null">
+            AND app_type = #{appType}
+        </if>
+        AND component_version IN
+        <foreach item="version" collection="versions" open="(" separator="," close=")">
+            #{version}
+        </foreach>
+        AND component_version is not null
+    </update>
+
+    <update id="batchUpdateTaskOwnerUserId">
+        UPDATE schedule_task_shade
+        SET owner_user_id = #{ownerUserId}
+        WHERE task_id in
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND app_type = #{appType}
+        AND is_deleted = 0
+    </update>
+
+    <select id="countTaskByTaskPageDTO" resultType="java.lang.Integer">
+        SELECT count(id)
+        FROM schedule_task_shade
+        WHERE is_deleted = 0
+        AND app_type = #{taskPageDTO.appType}
+        AND dtuic_tenant_id = #{taskPageDTO.tenantId}
+        AND project_id = #{taskPageDTO.projectId}
+        AND flow_id = 0
+        <if test="taskPageDTO.ownerId!=null" >
+            AND owner_user_id = #{taskPageDTO.ownerId}
+        </if>
+        <if test="taskPageDTO.taskIds!=null and taskPageDTO.taskIds.size > 0" >
+            AND task_id IN
+            <foreach collection="taskPageDTO.taskIds" close=")" item="taskId" open="(" separator=",">
+                #{taskId}
+            </foreach>
+        </if>
+
+        <if test="taskPageDTO.taskGroup!=null" >
+            AND task_group = #{taskPageDTO.taskGroup}
+        </if>
+        <if test="taskPageDTO.periodTypes != null and taskPageDTO.periodTypes.size() > 0 ">
+            AND period_type IN
+            <foreach collection="taskPageDTO.periodTypes" separator="," open="(" close=")" item="periodType">
+                #{periodType}
+            </foreach>
+        </if>
+        <if test="taskPageDTO.resourceIds != null and taskPageDTO.resourceIds.size() > 0 ">
+            AND resource_id IN
+            <foreach collection="taskPageDTO.resourceIds" separator="," open="(" close=")" item="resourceId">
+                #{resourceId}
+            </foreach>
+        </if>
+        <if test="taskPageDTO.taskTime!=null" >
+            <if test="taskPageDTO.taskTime.startCreateTime !=null and taskPageDTO.taskTime.endCreateTime !=null">
+                AND `gmt_create` &gt;= #{taskPageDTO.taskTime.startCreateTime}
+                AND `gmt_create` &lt;= #{taskPageDTO.taskTime.endCreateTime}
+            </if>
+
+            <if test="taskPageDTO.taskTime.startUpdateTime !=null and taskPageDTO.taskTime.endUpdateTime !=null">
+                AND `gmt_modified` &gt;= #{taskPageDTO.taskTime.startUpdateTime}
+                AND `gmt_modified` &lt;= #{taskPageDTO.taskTime.endUpdateTime}
+            </if>
+        </if>
+    </select>
+
+    <select id="pageTaskByTaskPageDTO" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            `app_type`,
+            `name`,
+            `task_type`,
+            `task_id`,
+            `period_type`,
+            `schedule_status`,
+            `gmt_modified`,
+            `owner_user_id`,
+            `flow_id`,
+            `is_deleted`,
+            `task_rule`,
+            `resource_id`
+        FROM schedule_task_shade
+        WHERE is_deleted = 0
+        AND app_type = #{taskPageDTO.appType}
+        AND dtuic_tenant_id = #{taskPageDTO.tenantId}
+        AND project_id = #{taskPageDTO.projectId}
+        AND flow_id = 0
+        <if test="taskPageDTO.ownerId!=null" >
+            AND owner_user_id = #{taskPageDTO.ownerId}
+        </if>
+        <if test="taskPageDTO.taskGroup!=null" >
+            AND task_group = #{taskPageDTO.taskGroup}
+        </if>
+        <if test="taskPageDTO.taskIds!=null and taskPageDTO.taskIds.size > 0" >
+            AND task_id IN
+            <foreach collection="taskPageDTO.taskIds" close=")" item="taskId" open="(" separator=",">
+                #{taskId}
+            </foreach>
+        </if>
+        <if test="taskPageDTO.periodTypes != null and taskPageDTO.periodTypes.size() > 0 ">
+            AND period_type IN
+            <foreach collection="taskPageDTO.periodTypes" separator="," open="(" close=")" item="periodType">
+                #{periodType}
+            </foreach>
+        </if>
+        <if test="taskPageDTO.resourceIds != null and taskPageDTO.resourceIds.size() > 0 ">
+            AND resource_id IN
+            <foreach collection="taskPageDTO.resourceIds" separator="," open="(" close=")" item="resourceId">
+                #{resourceId}
+            </foreach>
+        </if>
+        <if test="taskPageDTO.taskTime!=null" >
+            <if test="taskPageDTO.taskTime.startCreateTime !=null and taskPageDTO.taskTime.endCreateTime !=null">
+                AND `gmt_create` &gt;= #{taskPageDTO.taskTime.startCreateTime}
+                AND `gmt_create` &lt;= #{taskPageDTO.taskTime.endCreateTime}
+            </if>
+
+            <if test="taskPageDTO.taskTime.startUpdateTime !=null and taskPageDTO.taskTime.endUpdateTime !=null">
+                AND `gmt_modified` &gt;= #{taskPageDTO.taskTime.startUpdateTime}
+                AND `gmt_modified` &lt;= #{taskPageDTO.taskTime.endUpdateTime}
+            </if>
+        </if>
+        ORDER BY `gmt_modified` desc
+        LIMIT #{taskPageDTO.start},#{taskPageDTO.pageSize}
+    </select>
+
+    <select id="searchTaskIdBySearchName" resultType="java.lang.Long">
+        SELECT task_id
+        FROM schedule_task_shade
+        WHERE app_type = #{appType}
+          <if test="tenantId != null">
+              AND dtuic_tenant_id = #{tenantId}
+          </if>
+          <if test="projectId != null">
+              AND project_id = #{projectId}
+          </if>
+          <if test="ownerId!=null">
+              AND owner_user_id = #{ownerId}
+          </if>
+        <if test="businessType!=null">
+            AND business_type = #{businessType}
+        </if>
+        <if test="searchType!=null
+        and taskName!=null
+        and taskName.length!=0" >
+            AND `name`
+            <choose>
+                <when test = "searchType == 1">
+                    LIKE CONCAT('%',#{taskName},"%")
+                </when>
+                <when test = "searchType == 2">
+                    = #{taskName}
+                </when>
+                <when test = "searchType == 3">
+                    LIKE CONCAT(#{taskName},'%')
+                </when>
+                <when test = "searchType == 4">
+                    LIKE CONCAT('%',#{taskName})
+                </when>
+                <otherwise>
+                    = #{taskName}
+                </otherwise>
+            </choose>
+        </if>
+        <if test="taskTypes != null and taskTypes.size > 0" >
+            AND task_type IN
+            <foreach collection="taskTypes" separator="," item="taskType" close=")" open="(">
+                #{taskType}
+            </foreach>
+        </if>
+        <if test="scheduleStatus != null and scheduleStatus.size() > 0 ">
+            AND schedule_status IN
+            <foreach collection="scheduleStatus" separator="," open="(" close=")" item="scheduleStatus">
+                #{scheduleStatus}
+            </foreach>
+        </if>
+        <if test="isDeleted != null">
+            AND is_deleted = #{isDeleted}
+        </if>
+    </select>
+
+    <select id="listTaskIdsInOwnerId" resultType="java.lang.Long">
+        SELECT
+            distinct(task_id)
+        FROM schedule_task_shade
+        WHERE is_deleted = 0 AND app_type = #{appType} AND project_id = #{projectId} AND owner_user_id = #{ownerUserId};
+    </select>
+
+    <select id="listOwnerIds" resultType="java.util.Map">
+        SELECT
+            distinct  project_id as projectId, owner_user_id as ownerUserId, dtuic_tenant_id as tenantId
+        FROM schedule_task_shade
+        WHERE is_deleted = 0 and app_type = #{appType}
+    </select>
+
+    <select id="listSimpleByNodePIdsAndAppTypeAndProjectIdAndTaskIds" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+            `task_id`,`app_type`,`owner_user_id`
+        FROM schedule_task_shade
+        WHERE
+        app_type = #{appType}
+        AND is_deleted = 0
+        <if test="projectId!=null">
+            AND `project_id` = #{projectId}
+        </if>
+        <if test="taskIds != null and taskIds.size() > 0 ">
+            AND `task_id` IN
+            <foreach collection="taskIds" separator="," open="(" close=")" item="taskId">
+                #{taskId}
+            </foreach>
+        </if>
+        <if test="nodePIds != null and nodePIds.size() > 0 ">
+            AND `node_pid` IN
+            <foreach collection="nodePIds" separator="," open="(" close=")" item="nodePIds">
+                #{nodePIds}
+            </foreach>
+        </if>
+        <if test="taskGroup!=null">
+            AND task_group = #{taskGroup}
+        </if>
+    </select>
+
+    <select id="findMinIdByTaskType" resultType="java.lang.Long">
+        SELECT min(id) from schedule_task_shade where is_deleted = 0
+        AND task_group = #{taskGroup}
+        <if test="taskTypes != null and taskTypes.size() > 0" >
+            and task_type IN
+            <foreach collection="taskTypes" separator="," item="taskType" close=")" open="(">
+                #{taskType}
+            </foreach>
+        </if>
+        <if test="taskIds != null and taskIds.size() > 0" >
+            and task_id IN
+            <foreach collection="taskIds" separator="," item="taskId" close=")" open="(">
+                #{taskId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findTaskByTaskType" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT  `id`,`task_id`,`app_type`,`schedule_status`
+        FROM schedule_task_shade
+        WHERE is_deleted = 0
+        <if test="taskTypes != null and taskTypes.size() > 0" >
+            AND task_type IN
+            <foreach collection="taskTypes" separator="," item="taskType" close=")" open="(">
+                #{taskType}
+            </foreach>
+        </if>
+        <if test="taskIds != null and taskIds.size() > 0" >
+            AND task_id IN
+            <foreach collection="taskIds" separator="," item="taskId" close=")" open="(">
+                #{taskId}
+            </foreach>
+        </if>
+        <if test="isEquals">
+            AND id >= #{minId}
+        </if>
+
+        <if test="!isEquals">
+            AND id > #{minId}
+        </if>
+
+        AND task_group = #{taskGroup}
+        LIMIT #{fillDataLimitSize}
+    </select>
+
+    <select id="listSimpleFiledByTaskIds" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+          id,task_id,app_type,flow_id,task_type
+        FROM schedule_task_shade
+        WHERE app_type = #{appType}
+        <if test="isDeleted != null">
+            AND is_deleted = #{isDeleted}
+        </if>
+
+        <if test="taskIds !=null and taskIds.size() != 0">
+            AND task_id IN
+            <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getSimpleByTaskIdAndAppType" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        SELECT
+        <include refid="simple_select_content_fragment"/>
+        FROM schedule_task_shade
+        WHERE is_deleted = 0
+        AND task_id = #{taskId}
+        AND app_type = #{appType}
+        limit 1
+    </select>
+
+    <select id="findPriorityOneTask" resultType="java.lang.Long">
+        SELECT task_id
+        FROM schedule_task_shade
+        WHERE is_deleted = 0
+        AND task_id NOT IN (
+            SELECT task_id
+            FROM schedule_task_priority
+            WHERE is_deleted = 0
+            <if test="appType!=null">
+                AND app_type = #{appType}
+            </if>
+        )
+        <if test="appType!=null">
+            AND app_type = #{appType}
+        </if>
+    </select>
+
+    <select id="listByAppAndResourceId" resultType="com.dtstack.engine.api.domain.ScheduleTaskShade">
+        select id, task_id, dtuic_tenant_id, project_id, tenant_id, app_type, name
+         from schedule_task_shade
+        WHERE is_deleted = 0 and app_type = #{appType}
+           AND resource_id IN
+            <foreach collection="resourceIds" separator="," item="resourceId" close=")" open="(">
+                #{resourceId}
+            </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,1 @@
+UPDATE `schedule_job` SET `status` = 7 WHERE `status` = 21;

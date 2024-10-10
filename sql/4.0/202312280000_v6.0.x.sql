@@ -1,0 +1,6 @@
+delete from `console_component_config` where `cluster_id` = -2 and `component_id` = -112 and `component_type_code` = 18 and `key` = 'dtscript.python2.path';
+INSERT INTO `console_component_config` (`cluster_id`, `component_id`, `component_type_code`, `type`, `required`, `key`, `value`, `values`, `dependencyKey`, `dependencyValue`, `desc`, `gmt_create`, `gmt_modified`, `is_deleted`, `cascade_key`, `cascade_value`) VALUES
+(-2, -112, 18, 'INPUT', 1, 'dtscript.python2.path', '/data/anaconda2/bin/python2', NULL, NULL, NULL, "python2.x二进制可执行文件地址", NOW(), NOW(), 0, NULL, NULL);
+delete from `console_component_config` where `cluster_id` = -2 and `component_id` = -112 and `component_type_code` = 18 and `key` = 'dtscript.python3.path';
+INSERT INTO `console_component_config` (`cluster_id`, `component_id`, `component_type_code`, `type`, `required`, `key`, `value`, `values`, `dependencyKey`, `dependencyValue`, `desc`, `gmt_create`, `gmt_modified`, `is_deleted`, `cascade_key`, `cascade_value`) VALUES
+(-2, -112, 18, 'INPUT', 1, 'dtscript.python3.path', '/data/anaconda3/bin/python3', NULL, NULL, NULL, "python3.x二进制可执行文件地址",  NOW(), NOW(), 0, NULL, NULL);

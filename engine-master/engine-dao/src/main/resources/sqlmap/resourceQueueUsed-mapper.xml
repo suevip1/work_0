@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ResourceQueueUsedDao">
+
+    <insert id="batchInsert">
+        INSERT INTO console_resource_queue_used(cluster_id,queue_name,used,gmt_create)
+        VALUES
+        <foreach collection="useds" item="used" separator=",">
+            (#{used.clusterId},#{used.queueName},#{used.used},#{used.gmtCreate})
+        </foreach>
+    </insert>
+
+    <select id="listNewest" resultType="com.dtstack.engine.po.ResourceQueueUsed">
+        select cluster_id, queue_name,used
+        from console_resource_queue_used
+        WHERE cluster_id = #{clusterId} AND queue_name = #{queueName} order by id desc limit 1
+    </select>
+
+    <select id="listLastTwoDayByClusterIdAndQueueName" resultType="com.dtstack.engine.dto.TimeUsedNode">
+        select gmt_create as `time`, used
+        from console_resource_queue_used
+        where cluster_id = #{clusterId} AND queue_name = #{queueName} AND gmt_create between #{start} and #{end}
+        order by gmt_create asc
+    </select>
+
+    <delete id="clearByTimeInterval">
+       delete from console_resource_queue_used where gmt_create &lt; DATE_ADD(now(),INTERVAL #{timeInterval} DAY)
+    </delete>
+
+</mapper>

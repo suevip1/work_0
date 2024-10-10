@@ -1,0 +1,2 @@
+update console_component set version_name = 'Apache Hadoop 2.x' where component_type_code IN(4,5) and version_name = '' and hadoop_version like '2.%';
+update console_component set version_name = 'Apache Hadoop 3.x' where component_type_code IN(4,5) and version_name = '' and hadoop_version like '3.%';

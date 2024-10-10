@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.AlertTriggerRecordDao">
+    <sql id="Base_Column_List">
+        `id`,`project_id`,`app_type`,`alert_alarm_name`,`trigger_time`,`rule_id`,`rule_name`,`alarm_type`,
+        `task_name`,`task_type`,`baseline_name`,`alert_alarm_id`,`alert_channel_name`,
+        `owner_user_name`,`gmt_create`,`gmt_modified`,`is_deleted`,`owner_user_id`
+    </sql>
+    <sql id="Blob_Column_List">
+        `content`
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into alert_trigger_record ( `project_id`, `app_type`,`alert_alarm_name`,
+        `trigger_time`, `rule_id`, `rule_name`,`alarm_type`, `task_name`, `task_type`,`baseline_name`,
+        `alert_alarm_id`, `alert_channel_name`, `owner_user_name`,
+         `content`,`owner_user_id`)
+        values (#{projectId}, #{appType},#{alertAlarmName},
+        #{triggerTime}, #{ruleId}, #{ruleName}, #{alarmType}, #{taskName}, #{taskType},#{baselineName},
+        #{alertAlarmId}, #{alertChannelName}, #{ownerUserName}, #{content},#{ownerUserId})
+    </insert>
+
+    <select id="countByModel" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM `alert_trigger_record`
+        WHERE `is_deleted` = 0
+        and `project_id` = #{model.projectId}
+        and `app_type` = #{model.appType}
+        <if test="model.taskName!=null and model.taskName.length != ''">
+            and (
+                `task_name` like  concat('%', #{model.taskName}, '%')
+                or
+                `baseline_name` like  concat('%', #{model.taskName}, '%')
+            )
+        </if>
+        <if test="model.startTimestamp!=null and model.endTimestamp!=null">
+            and `gmt_create` &gt;= #{model.startTimestamp}
+            and `gmt_create` &lt;= #{model.endTimestamp}
+        </if>
+        <if test="model.alertAlarmName!=null and  model.alertAlarmName != ''">
+            and `alert_alarm_name` like  concat('%', #{model.alertAlarmName}, '%')
+        </if>
+        <if test="model.alarmTypes!=null and model.alarmTypes.size > 0">
+            and `alarm_type` IN
+            <foreach collection="model.alarmTypes" separator="," close=")" open="(" item="alarmType">
+                #{alarmType}
+            </foreach>
+        </if>
+        <if test="model.ruleIds!=null and model.ruleIds.size > 0">
+            and `rule_id` IN
+            <foreach collection="model.ruleIds" separator="," close=")" open="(" item="ruleId">
+                #{ruleId}
+            </foreach>
+        </if>
+        <if test="model.ownerUserId !=null">
+            and owner_user_id = #{model.ownerUserId}
+        </if>
+    </select>
+
+    <select id="selectByModel" resultType="com.dtstack.engine.po.AlertTriggerRecord">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM `alert_trigger_record`
+        WHERE `is_deleted` = 0
+        and `project_id` = #{model.projectId}
+        and `app_type` = #{model.appType}
+        <if test="model.taskName!=null and model.taskName != ''">
+            and (
+            `task_name` like  concat('%', #{model.taskName}, '%')
+            or
+            `baseline_name` like  concat('%', #{model.taskName}, '%')
+            )
+        </if>
+        <if test="model.startTimestamp!=null and model.endTimestamp!=null">
+            and `gmt_create` &gt;= #{model.startTimestamp}
+            and `gmt_create` &lt;= #{model.endTimestamp}
+        </if>
+        <if test="model.alertAlarmName!=null and  model.alertAlarmName != ''">
+            and `alert_alarm_name` like  concat('%', #{model.alertAlarmName}, '%')
+        </if>
+        <if test="model.alarmTypes!=null and model.alarmTypes.size > 0">
+            and `alarm_type` IN
+            <foreach collection="model.alarmTypes" separator="," close=")" open="(" item="alarmType">
+                #{alarmType}
+            </foreach>
+        </if>
+        <if test="model.ruleIds!=null and model.ruleIds.size > 0">
+            and `rule_id` IN
+            <foreach collection="model.ruleIds" separator="," close=")" open="(" item="ruleId">
+                #{ruleId}
+            </foreach>
+        </if>
+        <if test="model.ownerUserId !=null">
+            and owner_user_id = #{model.ownerUserId}
+        </if>
+        ORDER BY `gmt_create` DESC
+        LIMIT #{model.start},#{model.pageSize}
+    </select>
+
+    <select id="countAlarmByGmtCreate" resultType="java.lang.Integer">
+        SELECT count(id)
+        FROM `alert_trigger_record`
+        WHERE `is_deleted` = 0
+        and `gmt_create` &gt;= #{time}
+        and `project_id` = #{projectId}
+        and `app_type` = #{appType}
+    </select>
+
+    <select id="selectLast" resultType="com.dtstack.engine.po.AlertTriggerRecord">
+        SELECT *
+        FROM `alert_trigger_record`
+        WHERE `is_deleted` = 0
+          and `app_type` = #{appType}
+        ORDER BY ID desc limit 1
+    </select>
+
+</mapper>

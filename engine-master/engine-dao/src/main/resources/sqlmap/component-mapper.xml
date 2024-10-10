@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ComponentDao">
+
+    <sql id="select_content_fragment">
+      id,cluster_id,component_name,component_type_code,gmt_create,gmt_modified,is_deleted,hadoop_version,upload_file_name,kerberos_file_name,store_type,is_metadata,is_default,deploy_type,ssl_file_name,version_name
+    </sql>
+
+    <sql id="update_fragment">
+        <set>
+            <if test="isDeleted != null">
+                is_deleted = #{isDeleted},
+            </if>
+            <if test="uploadFileName!=null">
+                upload_file_name = #{uploadFileName},
+            </if>
+            <if test="hadoopVersion!=null">
+                hadoop_version = #{hadoopVersion},
+            </if>
+            <if test="versionName!=null">
+                version_name = #{versionName},
+            </if>
+            <if test="kerberosFileName != null">
+                kerberos_file_name = #{kerberosFileName},
+            </if>
+            <if test="sslFileName != null">
+                ssl_file_name = #{sslFileName},
+            </if>
+            <if test="storeType != null">
+                store_type = #{storeType},
+            </if>
+            <if test="isDefault != null">
+                is_default = #{isDefault},
+            </if>
+            gmt_modified =now()
+        </set>
+    </sql>
+
+    <select id="getOne" resultType="Component">
+        select <include refid="select_content_fragment"/>
+        from console_component
+        where id = #{id} and is_deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="Component" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO console_component(cluster_id,component_name,component_type_code,upload_file_name,hadoop_version,kerberos_file_name,store_type,is_metadata,is_default,deploy_type,ssl_file_name,version_name)
+        VALUES (#{clusterId},#{componentName},#{componentTypeCode},#{uploadFileName},#{hadoopVersion},#{kerberosFileName},#{storeType},#{isMetadata},#{isDefault},#{deployType},#{sslFileName},#{versionName})
+    </insert>
+
+    <update id="update">
+        update console_component
+        <include refid="update_fragment"/>
+        where id = #{id} and is_deleted = 0
+    </update>
+
+    <update id="updateMetadata">
+        update console_component set is_metadata = #{isMetadata} where cluster_id  = #{clusterId} and component_type_code = #{type}
+    </update>
+
+    <select id="listByClusterId" resultType="Component">
+        select <include refid="select_content_fragment"/>
+        from console_component
+        where  is_deleted = 0 and cluster_id = #{clusterId}
+        <if test="type!=null">
+            and component_type_code = #{type}
+        </if>
+        <if test="true == isDefault">
+            and is_default = 1
+        </if>
+    </select>
+
+    <select id="getByClusterIdAndComponentType" resultType="Component">
+        SELECT
+        c.id,c.cluster_id,c.component_name,c.component_type_code,c.gmt_create,c.gmt_modified,c.is_deleted,
+        c.hadoop_version,c.upload_file_name,c.kerberos_file_name,c.is_metadata,c.deploy_type,c.store_type,c.ssl_file_name,
+        c.version_name
+        FROM
+        console_component c
+        WHERE
+        c.cluster_id = #{clusterId} and c.component_type_code = #{type}
+        <choose>
+            <when test="componentVersion == null or componentVersion == ''">
+                and c.is_default = 1
+            </when>
+            <otherwise>
+               and c.hadoop_version = #{componentVersion}
+            </otherwise>
+        </choose>
+        <if test="deployType!= null">
+            and  c.deploy_type = #{deployType}
+        </if>
+          and c.is_deleted = 0 LIMIT 1
+    </select>
+
+    <select id="getByVersionName" resultType="Component">
+        SELECT
+        c.id,c.cluster_id,c.component_name,c.component_type_code,c.gmt_create,c.gmt_modified,c.is_deleted,
+        c.hadoop_version,c.upload_file_name,c.kerberos_file_name,c.is_metadata,c.deploy_type,c.store_type,c.ssl_file_name,
+        c.version_name
+        FROM
+        console_component c
+        WHERE
+        c.cluster_id = #{clusterId} and c.component_type_code = #{type}
+        <choose>
+            <when test="versionName == null or versionName == ''">
+                and c.is_default = 1
+            </when>
+            <otherwise>
+                and c.version_name = #{versionName}
+            </otherwise>
+        </choose>
+        <if test="deployType!= null">
+            and  c.deploy_type = #{deployType}
+        </if>
+        and c.is_deleted = 0 LIMIT 1
+    </select>
+
+
+
+    <select id="getClusterIdByComponentId" resultType="java.lang.Long">
+        SELECT
+        cluster_id
+        FROM
+        console_component
+        WHERE
+        id = #{componentId}
+        and is_deleted = 0
+    </select>
+
+    <delete id="deleteById">
+        delete from console_component where id = #{componentId}
+    </delete>
+
+    <select id="getNextDefaultComponent" resultType="com.dtstack.engine.api.domain.Component">
+        SELECT
+            cc.id,
+            cc.is_default,
+            cc.hadoop_version,
+            cc.cluster_id
+        FROM
+            console_component cc
+        WHERE
+          cc.id != #{currentDeleteId}
+          AND cc.cluster_id = #{clusterId}
+          AND cc.component_type_code = #{componentTypeCode}
+          AND cc.is_deleted = 0
+        ORDER BY cc.id ASC LIMIT 1
+    </select>
+
+    <select id="getDefaultComponentVersionByClusterAndComponentType" resultType="java.lang.String">
+        SELECT
+            cc.hadoop_version
+        FROM
+        console_component cc
+        LEFT JOIN console_cluster ccl ON ccl.id = cc.cluster_id
+        WHERE
+        cc.component_type_code = #{componentType}
+        AND cc.cluster_id = #{clusterId}
+        and is_default = 1
+        and cc.is_deleted = 0 LIMIT 1
+    </select>
+
+    <select id="getComponentVersionByEngineType" resultType="com.dtstack.engine.api.domain.Component">
+        SELECT
+            sd.dict_name as hadoop_version,
+            cc.gmt_create,
+            cc.is_default
+        FROM
+            console_component cc
+                INNER JOIN console_cluster_tenant cct ON cc.cluster_id = cct.cluster_id
+                INNER JOIN schedule_dict sd ON sd.dict_value = cc.hadoop_version
+        WHERE
+            cc.component_type_code = #{componentTypeCode}
+          AND cct.dt_uic_tenant_id = #{uicTenantId}
+          AND cc.is_deleted = 0
+    </select>
+
+    <select id="getMetadataComponent" resultType="com.dtstack.engine.api.domain.Component">
+        SELECT
+            c.id,c.cluster_id,c.component_name,c.component_type_code,c.gmt_create,c.gmt_modified,c.is_deleted,
+            c.hadoop_version,c.upload_file_name,c.kerberos_file_name,c.is_metadata,c.deploy_type,c.store_type,c.ssl_file_name,
+            c.version_name
+        FROM
+            console_component c
+                LEFT JOIN console_cluster ccl ON ccl.id = c.cluster_id
+        WHERE
+            c.is_metadata = 1
+          and ccl.id=#{clusterId}
+          and is_default = 1
+          and c.is_deleted = 0 LIMIT 1
+    </select>
+
+    <select id="listAllByClusterIdAndComponentTypeAndVersionName" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE component_type_code=#{componentType}
+        AND cluster_id=#{clusterId}
+        AND version_name=#{versionName}
+        AND is_deleted = 0 limit 2
+    </select>
+
+    <select id="countByClusterIdAndComponentType" resultType="java.lang.Long">
+        SELECT
+        count(1)
+        FROM console_component
+        WHERE component_type_code=#{componentType}
+        AND cluster_id=#{clusterId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="listDefaultByClusterIdAndComponentType" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE component_type_code=#{componentType}
+        AND cluster_id=#{clusterId}
+        AND is_deleted = 0
+        AND is_default = 1 limit 2
+    </select>
+
+    <select id="listAllByClusterIdAndComponentTypeWithLimit" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE component_type_code=#{componentType}
+        AND cluster_id=#{clusterId}
+        AND is_deleted = 0 limit #{maximum}
+    </select>
+
+    <select id="listAllByClusterIdAndComponentTypes" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE component_type_code in
+        <foreach collection="componentTypes" item="componentType" open="(" separator="," close=")">
+            #{componentType}
+        </foreach>
+        AND cluster_id=#{clusterId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="listAllByClusterIdAndComponentType" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE component_type_code = #{componentType}
+        AND cluster_id = #{clusterId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="listAllByClusterId" resultType="Component">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM console_component
+        WHERE cluster_id=#{clusterId}
+        AND is_deleted = 0
+    </select>
+
+    <update id="updateDefault">
+        update console_component set is_default = #{isDefault}
+        where cluster_id = #{clusterId} and is_deleted = 0 and component_type_code = #{componentType}
+        <if test="id != null">
+            and id = #{id};
+        </if>
+    </update>
+
+    <select id="listComponentByClusterId" resultType="Component">
+        select <include refid="select_content_fragment"/>
+        from console_component
+        where  is_deleted = 0
+        AND cluster_id IN
+        <foreach item="id" index="index" collection="clusterIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        <if test="types != null and types.size() > 0">
+            AND component_type_code IN
+            <foreach item="type" index="index" collection="types" open="(" separator="," close=")">
+                #{type}
+            </foreach>
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,1 @@
+UPDATE console_component_config SET `value` = '/default' WHERE `value` = '' AND component_id = -120 AND `key` = 'high-availability.cluster-id';

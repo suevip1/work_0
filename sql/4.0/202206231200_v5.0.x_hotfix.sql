@@ -1,0 +1,1 @@
+update console_param set  param_value = 'yyyyMM-0' where param_name = 'bdp.system.currmonth';

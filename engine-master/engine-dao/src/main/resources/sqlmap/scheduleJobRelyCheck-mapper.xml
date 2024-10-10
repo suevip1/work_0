@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobRelyCheckDao">
+
+    <sql id="select_content_fragment">
+        `id`, `job_id`, `direct_parent_job_id`, `parent_job_id`,`parent_job_check_status`,`gmt_create`, `gmt_modified`, `is_deleted`
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO schedule_job_rely_check (`job_id`,`direct_parent_job_id`, `parent_job_id`, `parent_job_check_status`,`is_deleted`)
+        VALUES
+        <foreach collection="scheduleJobRelyCheckList" item="scheduleJobRelyCheck" separator=",">
+            (
+                #{scheduleJobRelyCheck.jobId},
+                #{scheduleJobRelyCheck.directParentJobId},
+                #{scheduleJobRelyCheck.parentJobId},
+                #{scheduleJobRelyCheck.parentJobCheckStatus},
+                #{scheduleJobRelyCheck.isDeleted}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByJobId">
+        DELETE FROM schedule_job_rely_check WHERE `job_id` = #{jobId}
+    </delete>
+
+    <delete id="deleteByJobIds">
+        DELETE FROM schedule_job_rely_check WHERE
+        `job_id` IN
+        <foreach collection="jobIds" separator="," item="jobId" close=")" open="(" >
+            #{jobId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByParentJobIds">
+        DELETE FROM schedule_job_rely_check WHERE
+        `parent_job_id` IN
+        <foreach collection="jobIds" separator="," item="jobId" close=")" open="(" >
+            #{jobId}
+        </foreach>
+    </delete>
+
+
+    <select id="findByJobId" resultType="com.dtstack.engine.po.ScheduleJobRelyCheck">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_job_rely_check
+        WHERE
+        `job_id` = #{jobId}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="findByJobIds" resultType="com.dtstack.engine.po.ScheduleJobRelyCheck">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_job_rely_check
+        WHERE
+        `job_id` IN
+        <foreach collection="jobIds" separator="," item="jobId" close=")" open="(" >
+            #{jobId}
+        </foreach>
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="findByParentsJobIds" resultType="com.dtstack.engine.po.ScheduleJobRelyCheck">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_job_rely_check
+        WHERE
+        `parent_job_id` IN
+        <foreach collection="parentJobIds" separator="," item="jobId" close=")" open="(" >
+            #{jobId}
+        </foreach>
+        AND `is_deleted` = 0
+    </select>
+
+</mapper>

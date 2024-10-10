@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.WorkflowDao">
+
+    <sql id="select_sub_content_fragment">
+        id,task_id,flow_id,flow_job_id,app_type,param_task_action,job_id,is_parent_fail,is_skip,gmt_modified,gmt_create,is_deleted
+    </sql>
+
+    <sql id="simple_select_sub_content_fragment">
+        id,task_id,flow_id,flow_job_id,app_type,job_id,is_parent_fail,is_skip,gmt_modified,gmt_create,is_deleted
+    </sql>
+
+    <sql id="select_content_fragment">
+        id,flow_id,flow_job_id,app_type,graph,status,error_msg,gmt_modified,gmt_create,is_deleted
+    </sql>
+
+    <sql id="update_fragment">
+        <set>
+            <if test="actionParam!=null">
+                param_task_action = #{paramTaskAction}
+            </if>
+            <if test="jobId!=null">
+                job_id = #{jobId}
+            </if>
+            <if test="flowJobId!=null">
+                flow_job_id = #{flowJobId}
+            </if>
+            <if test="taskId!=null">
+                task_id = #{taskId}
+            </if>
+            <if test="flowId!=null">
+                flow_id = #{flowId}
+            </if>
+            <if test="status!=null">
+                status = #{status}
+            </if>
+            <if test="isDeleted!=null">
+                is_deleted = #{isDeleted},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified},
+            </if>
+        </set>
+    </sql>
+
+
+    <insert id="batchInsertWorkflowSubRunInfo">
+        INSERT INTO
+        schedule_workflow_sub_tmp_run_info(task_id,flow_id,flow_job_id,job_id,app_type,param_task_action)
+        VALUES
+        <foreach collection="workflowSubTmpRunInfos" item="param" separator=",">
+            (#{param.taskId},#{param.flowId},#{param.flowJobId},#{param.jobId},#{param.appType},#{param.paramTaskAction})
+        </foreach>
+    </insert>
+
+    <select id="getWorkflowTmpRunInfo" resultType="com.dtstack.engine.po.WorkflowTmpRunInfo">
+        SELECT
+        <include refid="select_content_fragment" />
+        FROM schedule_workflow_tmp_run_info
+        WHERE flow_job_id = #{flowJobId}
+        AND is_deleted = 0
+    </select>
+
+    <delete id="deleteWorkflowSubRunInfoByFlowJobIdAndTaskIds">
+        DELETE FROM schedule_workflow_sub_tmp_run_info
+        WHERE flow_job_id = #{flowJobId}
+        AND task_id IN
+        <foreach collection="taskIds" separator="," close=")" open="(" item="taskId" >
+            #{taskId}
+        </foreach>
+    </delete>
+
+    <insert id="insertWorkflowTmpRunInfo">
+        INSERT INTO
+            schedule_workflow_tmp_run_info(flow_id,flow_job_id,app_type,graph,status)
+        VALUES
+            (#{flowId},
+             #{flowJobId},
+             #{appType},
+             #{graph},
+             #{status})
+    </insert>
+
+    <update id="updateWorkflowStatusAndErrorMsgByFlowJobId">
+        UPDATE schedule_workflow_tmp_run_info
+        SET status = #{status}, error_msg = #{errorMsg}, gmt_modified = now()
+        WHERE flow_job_id = #{flowJobId}
+    </update>
+
+    <select id="getWorkflowSubTmpRunInfoByFlowJobIdAndJobIdAndTaskId" resultType="com.dtstack.engine.po.WorkflowSubTmpRunInfo">
+        SELECT
+        <include refid="select_sub_content_fragment" />
+        FROM schedule_workflow_sub_tmp_run_info
+        WHERE flow_job_id = #{flowJobId} AND flow_id = #{flowId} AND task_id = #{taskId}
+        AND is_deleted = 0
+    </select>
+
+    <select id="getSimpleWorkflowSubTmpRunInfosByFlowJobId" resultType="com.dtstack.engine.po.WorkflowSubTmpRunInfo">
+        SELECT
+        <include refid="simple_select_sub_content_fragment" />
+        FROM schedule_workflow_sub_tmp_run_info
+        WHERE flow_job_id = #{flowJobId}
+        AND is_deleted = 0
+    </select>
+
+    <update id="updateSubJobParentFail">
+        UPDATE schedule_workflow_sub_tmp_run_info
+        SET is_parent_fail = 1
+        WHERE flow_job_id = #{flowJobId} AND flow_id = #{flowId} AND task_id = #{taskId}
+        AND is_deleted = 0
+    </update>
+
+    <update id="updateSubJobSkip">
+        UPDATE schedule_workflow_sub_tmp_run_info
+        SET is_skip = 1
+        WHERE flow_job_id = #{flowJobId} AND flow_id = #{flowId} AND task_id = #{taskId}
+        AND is_deleted = 0
+    </update>
+
+    <select id="getWorkflowSubTmpRunInfoByFlowJobIdAndJobId" resultType="com.dtstack.engine.po.WorkflowSubTmpRunInfo">
+        SELECT
+        <include refid="select_sub_content_fragment" />
+        FROM schedule_workflow_sub_tmp_run_info
+        WHERE flow_job_id = #{flowJobId} AND job_id = #{jobId}
+        AND is_deleted = 0
+    </select>
+</mapper>

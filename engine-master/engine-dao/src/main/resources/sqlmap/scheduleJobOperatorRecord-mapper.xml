@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobOperatorRecordDao">
+
+    <insert id="insert" parameterType="ScheduleJobOperatorRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into schedule_job_operator_record(job_id,force_cancel_flag,operator_type,node_address)
+        values(#{jobId}, #{forceCancelFlag},#{operatorType},#{nodeAddress})
+    </insert>
+
+    <insert id="insertIgnore">
+        insert ignore into schedule_job_operator_record(job_id,force_cancel_flag,operator_type,node_address)
+        values(#{jobId}, #{forceCancelFlag},#{operatorType},#{nodeAddress})
+    </insert>
+
+    <update id="delete" parameterType="java.util.HashMap">
+        delete from schedule_job_operator_record where id = #{id}
+    </update>
+
+    <delete id="deleteByJobIdAndType" parameterType="java.util.HashMap">
+        delete from schedule_job_operator_record where job_id = #{jobId} and operator_type = #{type}
+    </delete>
+    <delete id="deleteByJobIds">
+        delete from schedule_job_operator_record where job_id IN
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        and is_deleted =0
+        and operator_type in (2);
+    </delete>
+
+    <delete id="deleteByJobIdsAndType">
+        delete from schedule_job_operator_record where job_id IN
+            <foreach collection="jobIds" separator="," open="(" close=")" item="jobId">
+                #{jobId}
+            </foreach>
+        and operator_type = #{type}
+    </delete>
+
+    <update id="updateOperatorExpiredVersion" parameterType="java.util.HashMap">
+        update schedule_job_operator_record set operator_expired = #{operatorExpired}, version = version + 1, gmt_modified = now() where id = #{id} and version = #{version}
+    </update>
+
+    <select id="listStopJob" parameterType="java.util.HashMap" resultType="ScheduleJobOperatorRecord">
+        select id,job_id,version,gmt_create,gmt_modified,is_deleted,force_cancel_flag,operator_type
+        from schedule_job_operator_record where id > #{startId} and operator_expired &lt; now() and is_deleted =0 and operator_type in (0,-1,5)
+        order by id asc limit 100;
+    </select>
+
+    <select id="listStopRecordByJobIds" parameterType="java.util.HashMap" resultType="java.lang.String">
+        select job_id as jobId
+        from schedule_job_operator_record
+        where job_id in
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        and is_deleted =0 and operator_type in (0,-1);
+    </select>
+
+    <select id="listConsoleStopJobIdsByJobIds" parameterType="java.util.HashMap" resultType="java.lang.String">
+        select job_id as jobId
+        from schedule_job_operator_record
+        where job_id in
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        and is_deleted =0 and operator_type = -1;
+    </select>
+
+    <select id="listTimeoutRecordByJobIds" parameterType="java.util.HashMap" resultType="ScheduleJobOperatorRecord">
+        select id,job_id,version,gmt_create,gmt_modified,is_deleted,force_cancel_flag,operator_type
+        from schedule_job_operator_record
+        where job_id in
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        and is_deleted =0 and operator_type = 5;
+    </select>
+
+
+    <select id="getJobCreateTimeById" parameterType="java.lang.Long" resultType="java.sql.Timestamp">
+        select gmt_create from schedule_job_operator_record where id=#{id} and is_deleted=0;
+    </select>
+
+    <insert id="insertBatch">
+        insert ignore into
+        schedule_job_operator_record(job_id,force_cancel_flag,operator_type,node_address)
+        values
+        <foreach collection="records" item="record" separator=",">
+            (#{record.jobId}, #{record.forceCancelFlag},#{record.operatorType},#{record.nodeAddress})
+        </foreach>
+    </insert>
+
+    <select id="listJobs" parameterType="java.util.HashMap" resultType="ScheduleJobOperatorRecord">
+        select *
+        from schedule_job_operator_record where id > #{startId} and is_deleted =0 and node_address = #{nodeAddress}
+        and operator_type IN
+        <foreach item="type" index="index" collection="types" open="(" separator="," close=")">
+            #{type}
+        </foreach>
+        order by id asc limit #{limit};
+    </select>
+
+    <update id="updateNodeAddressByIds">
+        UPDATE
+        schedule_job_operator_record
+        set node_address = #{nodeAddress}
+        where job_id IN
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+    </update>
+
+
+    <select id="getOperatorByTypeAndJobId" resultType="ScheduleJobOperatorRecord">
+        select * from schedule_job_operator_record where job_id = #{jobId} and operator_type = #{type} LIMIT 1;
+    </select>
+
+
+    <select id="listOperatorByJobIdsAndType" parameterType="java.util.HashMap" resultType="ScheduleJobOperatorRecord">
+        select *
+        from schedule_job_operator_record where
+        operator_type IN
+        <foreach item="type" index="index" collection="types" open="(" separator="," close=")">
+            #{type}
+        </foreach>
+        and job_id IN
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+    </select>
+    <select id="countByType" resultType="java.lang.Long">
+        SELECT count(id) FROM schedule_job_operator_record
+        WHERE operator_type = #{type}
+        AND is_deleted = 0
+    </select>
+
+    <update id="update">
+        UPDATE
+        schedule_job_operator_record
+        SET
+        gmt_modified = now()
+        <if test="forceCancelFlag!=null">
+            ,force_cancel_flag = #{forceCancelFlag}
+        </if>
+        <if test="nodeAddress!=null">
+            ,node_address = #{nodeAddress}
+        </if>
+        WHERE
+        job_id = #{jobId}
+    </update>
+
+</mapper>

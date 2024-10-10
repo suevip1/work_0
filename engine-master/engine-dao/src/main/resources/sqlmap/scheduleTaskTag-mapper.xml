@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskTagDao">
+
+    <sql id="select_content_fragment">
+        `id`,
+        `app_type`,
+        `task_id`,
+        `tag_id`,
+        `gmt_create`,
+        `gmt_modified`,
+        `is_deleted`
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO schedule_task_tag (`app_type`, `task_id`, `tag_id`,`is_deleted`) VALUES
+        <foreach collection="tags" item="tag" separator=",">
+            (#{tag.appType}, #{tag.taskId},#{tag.tagId},#{tag.isDeleted})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByTaskIdAndAppType">
+        DELETE FROM schedule_task_tag WHERE task_id = #{taskId} AND app_type = #{appType}
+    </delete>
+
+    <delete id="deleteTagByTagId">
+        DELETE FROM schedule_task_tag WHERE tag_id = #{tagId}
+    </delete>
+
+    <select id="findTaskByTagIds" resultType="com.dtstack.engine.po.ScheduleTaskTag">
+        SELECT
+            `app_type`,
+            `task_id`,
+            `tag_id`
+        FROM schedule_task_tag
+        WHERE `tag_id` IN
+        <foreach collection="tagIds" separator="," item="tagId" close=")" open="(">
+            #{tagId}
+        </foreach>
+        <if test="appType != null" >
+            AND app_type = #{appType}
+        </if>
+    </select>
+
+    <select id="findTagByTaskIds" resultType="com.dtstack.engine.po.ScheduleTaskTag">
+        SELECT
+            `app_type`,
+            `task_id`,
+            `tag_id`
+        FROM schedule_task_tag
+        WHERE  `task_id` IN
+        <foreach collection="taskIds" open="(" close=")" item="taskId" separator=",">
+            #{taskId}
+        </foreach>
+        AND `is_deleted` = 0
+        AND app_type = #{appType}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ResourceGroupDao">
+    <sql id="select_content_fragment">
+        id,`name`,description,queue_path,cluster_id,component_type_code,gmt_create,gmt_modified,is_deleted
+    </sql>
+
+    <select id="generalQuery" resultType="com.dtstack.engine.po.ResourceGroup">
+        SELECT
+        id, `name`, description, queue_path
+        FROM console_resource_group
+        WHERE cluster_id = #{model.clusterId} and is_deleted = 0
+         and resource_type = 0
+        <choose>
+            <when test="model.componentTypeCode != null">
+                and component_type_code = #{model.componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+        <if test="orderBy != null and sort != null">
+            order by ${orderBy} ${sort}
+        </if>
+        <if test="orderBy != null and sort == null">
+            order by ${orderBy} desc
+        </if>
+        <if test="start != null and pageSize != null">
+            limit #{start} , #{pageSize}
+        </if>
+        <if test="start == null and pageSize != null">
+            limit #{pageSize}
+        </if>
+        <if test="start == null and pageSize == null">
+            limit 1000
+        </if>
+    </select>
+
+    <select id="generalCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM console_resource_group
+        WHERE cluster_id = #{model.clusterId} and is_deleted = 0
+        and resource_type = 0
+        <choose>
+            <when test="model.componentTypeCode != null">
+                and component_type_code = #{model.componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getOne" resultType="com.dtstack.engine.po.ResourceGroup">
+        SELECT
+        id, `name`, description, queue_path, cluster_id,is_deleted
+        FROM console_resource_group
+        WHERE id = #{id}
+        <if test="deleted != null">
+          AND is_deleted = #{deleted}
+        </if>
+    </select>
+
+    <select id="countByClusterIdAndName" resultType="java.lang.Long">
+        select count(1)
+        from console_resource_group
+        where cluster_id = #{clusterId} and `name` = #{name} and is_deleted = 0
+         and resource_type = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="countByLabelAndUser" resultType="java.lang.Long">
+        select count(1)
+        from console_resource_group
+        where cluster_id = #{clusterId} and `name` = #{label}
+         and queue_path = #{user} and is_deleted = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+        and resource_type = 0
+    </select>
+
+    <select id="listNamesByQueueName" resultType="java.lang.String">
+        SELECT
+            `name`
+        FROM console_resource_group
+        WHERE queue_path = #{queuePath} and cluster_id = #{clusterId} and is_deleted = 0
+        and resource_type = 0
+
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="listDropDownByClusterId" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT
+            id as resource_id, `name` as resource_name
+        FROM console_resource_group
+        WHERE cluster_id = #{clusterId} and is_deleted = 0
+        and resource_type = 0
+
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="listDetailByIds" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT crg.id     as resource_id,
+                crg.`name` as resource_name,
+                cq.capacity,
+                cq.max_capacity
+        FROM console_resource_group crg
+        left join console_queue cq
+        on crg.cluster_id = cq.cluster_id
+        and cq.is_deleted = 0
+        WHERE crg.id in
+        <foreach collection="resourceIds" item="resourceId" open="(" close=")" separator=",">
+            #{resourceId}
+        </foreach>
+            and crg.is_deleted = 0  and resource_type = 0
+
+    </select>
+
+    <select id="getDetailById" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT crg.id  AS resource_id,
+        crg.`name` AS resource_name,
+        cq.capacity,
+        cq.max_capacity
+        FROM console_resource_group crg
+        LEFT JOIN console_queue cq
+        ON crg.cluster_id = cq.cluster_id
+        AND cq.is_deleted = 0
+        WHERE crg.id = #{resourceId}
+        AND crg.is_deleted = 0   and resource_type = 0
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.ResourceGroup" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO console_resource_group(`name`,description,cluster_id,queue_path,gmt_create,gmt_modified,is_deleted, component_type_code)
+        VALUES (#{name},#{description},#{clusterId},#{queuePath},#{gmtCreate},#{gmtModified},#{isDeleted}, #{componentTypeCode})
+    </insert>
+
+    <insert id="batchInsert" parameterType="com.dtstack.engine.po.ResourceGroup" useGeneratedKeys="true" keyProperty="id">
+
+        INSERT INTO console_resource_group(`name`,description,cluster_id,queue_path,
+        gmt_create,gmt_modified,is_deleted,resource_type)
+        VALUES
+        <foreach collection="groupList" item="group" separator=",">
+            (#{group.name},#{group.description},#{group.clusterId},#{group.queuePath},#{group.gmtCreate},
+            #{group.gmtModified},#{group.isDeleted},#{group.resourceType})
+        </foreach>
+
+    </insert>
+
+
+    <update id="batchUpdateToUnLeaf" parameterType="java.util.List">
+        UPDATE console_resource_group
+        SET description = '0'
+        WHERE resource_type = 1 and `name` IN
+        <foreach collection="groupList" item="group" open="(" separator="," close=")">
+            #{group.name}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateToLeaf" parameterType="java.util.List">
+        UPDATE console_resource_group
+        SET description = '1'
+        WHERE resource_type = 1 and `name` IN
+        <foreach collection="groupList" item="group" open="(" separator="," close=")">
+            #{group}
+        </foreach>
+    </update>
+
+
+    <update id="update" parameterType="com.dtstack.engine.po.ResourceGroup">
+        UPDATE console_resource_group
+        <set>
+            <if test="name!=null">
+                `name` = #{name},
+            </if>
+            <if test="description!=null">
+                description = #{description},
+            </if>
+            <if test="clusterId!=null">
+                cluster_id = #{clusterId},
+            </if>
+            <if test="queuePath != null">
+                queue_path = #{queuePath},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified},
+            </if>
+            <if test="isDeleted != null">
+                is_deleted = #{isDeleted},
+            </if>
+        </set>
+        WHERE id = #{id}  and resource_type = 0
+    </update>
+
+    <update id="delete">
+        update console_resource_group set is_deleted = 1, gmt_modified = now()
+        where id = #{id}
+    </update>
+
+    <select id="findLabelByClusterAndName" resultType="com.dtstack.engine.po.ResourceGroup">
+        SELECT
+         id, `name`, description, queue_path, cluster_id, component_type_code
+        FROM console_resource_group
+        WHERE cluster_id = #{clusterId}
+         and component_type_code = #{componentTypeCode}
+         and name = #{name}
+         and queue_path = #{queuePath}
+         and is_deleted = 0
+         limit 1
+    </select>
+
+    <select id="listByIds" resultType="com.dtstack.engine.po.ResourceGroup">
+        select <include refid="select_content_fragment"/>
+         from console_resource_group
+        where id in
+          <foreach collection="resourceIds" item="resourceId" open="(" close=")" separator=",">
+            #{resourceId}
+          </foreach>
+        and is_deleted = 0
+    </select>
+
+    <delete id="batchRemove">
+        update console_resource_group set is_deleted = 1, gmt_modified = now()
+         where id in
+        <foreach collection="resourceIds" item="resourceId" open="(" close=")" separator=",">
+         #{resourceId}
+        </foreach>
+    </delete>
+
+    <select id="listByClusterIdAndComponentTypeCode" resultType="com.dtstack.engine.po.ResourceGroup">
+        select <include refid="select_content_fragment"/>
+         from console_resource_group
+        where cluster_id = #{clusterId} and is_deleted = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+    <select id="listAllTrinoResource" resultType="com.dtstack.engine.po.ResourceGroup">
+        select id,name,cluster_id
+        from console_resource_group
+        where cluster_id = #{clusterId} and resource_type = #{resourceType}
+        <if test="onlyChild == 1">
+            and description = '1'
+        </if>
+    </select>
+
+    <select id="getTrinoResourceByName" resultType="com.dtstack.engine.po.ResourceGroup">
+        select id,name,cluster_id
+        from console_resource_group
+        where cluster_id = #{clusterId} and resource_type = 1
+        and name = #{resourceName}
+    </select>
+
+    <update id="deleteTrinoResource">
+
+        delete from  console_resource_group
+        WHERE resource_type = 1 and `name` IN
+        <foreach collection="groupNames" item="groupName" open="(" separator="," close=")">
+            #{groupName}
+        </foreach>
+
+    </update>
+
+</mapper>

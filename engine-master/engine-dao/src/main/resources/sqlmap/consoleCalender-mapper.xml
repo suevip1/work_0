@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleCalenderDao">
+
+    <insert id="insert" parameterType="ConsoleCalender" useGeneratedKeys="true" keyProperty="id">
+        insert into
+        console_calender(calender_name,latest_calender_time,calender_file_name,calender_time_format, use_type)
+        values (#{calender.calenderName},#{calender.latestCalenderTime},#{calender.calenderFileName},#{calender.calenderTimeFormat}, #{calender.useType})
+    </insert>
+
+    <update id="delete">
+        update  console_calender set is_deleted = 1 where id = #{calenderId}
+    </update>
+
+    <update id="updateById" parameterType="ConsoleCalender">
+        update console_calender
+        <set>
+            <if test="calenderName != null and calenderName!=''">
+                calender_name = #{calenderName},
+            </if>
+            <if test="latestCalenderTime != null">
+                latest_calender_time = #{latestCalenderTime},
+            </if>
+            <if test="calenderTimeFormat != null and calenderTimeFormat != ''">
+                calender_time_format = #{calenderTimeFormat},
+            </if>
+            <if test="calenderFileName!=null and calenderFileName!=''">
+                calender_file_name = #{calenderFileName},
+            </if>
+            gmt_modified = CURRENT_TIMESTAMP
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="selectByName" resultType="com.dtstack.engine.po.ConsoleCalender">
+        select * from console_calender where calender_name = #{calenderName} and is_deleted = 0 and use_type = 2
+    </select>
+
+
+    <select id="selectById" resultType="com.dtstack.engine.po.ConsoleCalender">
+        select * from console_calender where id = #{calenderId}
+    </select>
+
+    <select id="pageQuery" resultType="com.dtstack.engine.po.ConsoleCalender">
+        select * from console_calender where is_deleted = 0 and use_type = 2
+        <if test="orderBy != null and sort != null">
+            order by ${orderBy} ${sort} ,id desc
+        </if>
+        limit #{start}, #{pageSize}
+    </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from console_calender where is_deleted = 0 and use_type = 2
+    </select>
+
+    <update id="remove">
+        delete from console_calender where id = #{calenderId}
+    </update>
+</mapper>

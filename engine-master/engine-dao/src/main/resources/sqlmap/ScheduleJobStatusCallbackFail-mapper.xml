@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobStatusCallbackFailDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ScheduleJobStatusCallbackFail">
+    <!--@mbg.generated-->
+    <!--@Table schedule_job_status_callback_fail-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="job_id" jdbcType="VARCHAR" property="jobId" />
+    <result column="retry_num" jdbcType="INTEGER" property="retryNum" />
+    <result column="last_retry_fail_reason" jdbcType="VARCHAR" property="lastRetryFailReason" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="BOOLEAN" property="isDeleted" />
+    <result column="monitor_id" jdbcType="INTEGER" property="monitorId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, job_id, retry_num, last_retry_fail_reason, gmt_create, gmt_modified, is_deleted, 
+    monitor_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from schedule_job_status_callback_fail
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from schedule_job_status_callback_fail
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleJobStatusCallbackFail" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_callback_fail (job_id, retry_num, last_retry_fail_reason, 
+      gmt_create, gmt_modified, is_deleted, 
+      monitor_id)
+    values (#{jobId,jdbcType=VARCHAR}, #{retryNum,jdbcType=INTEGER}, #{lastRetryFailReason,jdbcType=VARCHAR}, 
+      #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{isDeleted,jdbcType=BOOLEAN}, 
+      #{monitorId,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ScheduleJobStatusCallbackFail" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_callback_fail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="jobId != null">
+        job_id,
+      </if>
+      <if test="retryNum != null">
+        retry_num,
+      </if>
+      <if test="lastRetryFailReason != null">
+        last_retry_fail_reason,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+      <if test="monitorId != null">
+        monitor_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="jobId != null">
+        #{jobId,jdbcType=VARCHAR},
+      </if>
+      <if test="retryNum != null">
+        #{retryNum,jdbcType=INTEGER},
+      </if>
+      <if test="lastRetryFailReason != null">
+        #{lastRetryFailReason,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BOOLEAN},
+      </if>
+      <if test="monitorId != null">
+        #{monitorId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ScheduleJobStatusCallbackFail">
+    <!--@mbg.generated-->
+    update schedule_job_status_callback_fail
+    <set>
+      <if test="jobId != null">
+        job_id = #{jobId,jdbcType=VARCHAR},
+      </if>
+      <if test="retryNum != null">
+        retry_num = #{retryNum,jdbcType=INTEGER},
+      </if>
+      <if test="lastRetryFailReason != null">
+        last_retry_fail_reason = #{lastRetryFailReason,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BOOLEAN},
+      </if>
+      <if test="monitorId != null">
+        monitor_id = #{monitorId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ScheduleJobStatusCallbackFail">
+    <!--@mbg.generated-->
+    update schedule_job_status_callback_fail
+    set job_id = #{jobId,jdbcType=VARCHAR},
+      retry_num = #{retryNum,jdbcType=INTEGER},
+      last_retry_fail_reason = #{lastRetryFailReason,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BOOLEAN},
+      monitor_id = #{monitorId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into schedule_job_status_callback_fail
+    (job_id, retry_num, last_retry_fail_reason, gmt_create, gmt_modified, is_deleted, 
+      monitor_id)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.jobId,jdbcType=VARCHAR}, #{item.retryNum,jdbcType=INTEGER}, #{item.lastRetryFailReason,jdbcType=VARCHAR}, 
+        #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModified,jdbcType=TIMESTAMP}, #{item.isDeleted,jdbcType=BOOLEAN}, 
+        #{item.monitorId,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+
+  <select id="listAll" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from schedule_job_status_callback_fail
+    where is_deleted = 0
+  </select>
+
+  <sql id="alias_Base_Column_List">
+    l.id, l.job_id, l.retry_num, l.last_retry_fail_reason, l.gmt_create, l.gmt_modified, l.is_deleted,
+    l.monitor_id
+  </sql>
+  <select id="listByAppTypeKey" resultMap="BaseResultMap">
+    select <include refid="alias_Base_Column_List" />
+    from schedule_job_status_callback_fail l, schedule_job_status_monitor r
+     where l.is_deleted = 0 and r.is_deleted = 0
+    and l.monitor_id = r.id
+    and r.app_type_key = #{appTypeKey,jdbcType=VARCHAR}
+  </select>
+
+  <select id="checkExists" resultType="java.lang.Integer">
+    select 1 from schedule_job_status_callback_fail l, schedule_job_status_monitor r
+     where l.is_deleted = 0 and r.is_deleted = 0
+      and l.monitor_id = r.id
+    limit 1
+  </select>
+
+  <select id="selectByJobIdAndMonitorId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+      from schedule_job_status_callback_fail
+    where job_id = #{jobId,jdbcType=VARCHAR} and monitor_id = #{monitorId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByThreshold">
+    delete from schedule_job_status_callback_fail where retry_num > #{failMaxRetryNum}
+     or gmt_create &lt; date_add(now(), interval -#{failRemainLimitInDay} DAY)
+  </delete>
+
+  <delete id="deleteWhenNoAppType">
+    delete from schedule_job_status_callback_fail where monitor_id not in
+     (select id from schedule_job_status_monitor)
+  </delete>
+</mapper>

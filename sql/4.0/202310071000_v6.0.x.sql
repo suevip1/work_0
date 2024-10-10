@@ -1,0 +1,1 @@
+UPDATE schedule_dict SET depend_name = '1,2' WHERE dict_code  = 'flink_version' AND dict_name = '1.16';

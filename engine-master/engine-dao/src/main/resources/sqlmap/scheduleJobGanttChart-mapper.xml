@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobGanttChartDao">
+
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.ScheduleJobGanttChart" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into schedule_job_gantt_chart (`job_id`)
+        values (#{jobId,jdbcType=VARCHAR})
+    </insert>
+
+
+    <update id="updateTime">
+        update schedule_job_gantt_chart
+        set ${column} = now()
+        where job_id = #{jobId}
+          and ${column} is null
+    </update>
+
+
+    <select id="selectOne" parameterType="java.lang.String" resultType="com.dtstack.engine.po.ScheduleJobGanttChart">
+        select *
+        from schedule_job_gantt_chart
+        where job_id = #{jobId} limit 1
+    </select>
+
+    <delete id="deleteByJobId">
+        delete
+        from schedule_job_gantt_chart
+        where job_id = #{jobId}
+    </delete>
+
+    <delete id="deleteByJobIds">
+        delete
+        from schedule_job_gantt_chart
+        where job_id IN
+        <foreach item="jobId" index="index" collection="jobIds" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,1 @@
+ALTER TABLE `schedule_engine_job_checkpoint` MODIFY COLUMN `id` bigint(20) NOT NULL AUTO_INCREMENT;

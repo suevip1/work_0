@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.BaselineTaskTaskDao">
+
+    <sql id="Base_Column_List">
+        `id`, `baseline_task_id`, `task_id`, `task_app_type`, `gmt_create`, `gmt_modified`,
+        `is_deleted`
+    </sql>
+
+    <insert id="batchInsert">
+        insert into baseline_task_task_shade ( `baseline_task_id`, `task_id`, `task_app_type`, `is_deleted`)
+        values
+        <foreach collection="baselineTaskTasks" item="baselineTaskTask" separator=",">
+            (#{baselineTaskTask.baselineTaskId}, #{baselineTaskTask.taskId}, #{baselineTaskTask.taskAppType}, #{baselineTaskTask.isDeleted})
+        </foreach>
+
+    </insert>
+
+    <delete id="deleteByBaselineTaskId">
+        delete from `baseline_task_task_shade`
+        where `baseline_task_id` = #{baselineTaskId}
+    </delete>
+
+    <delete id="deleteByIds">
+        delete from `baseline_task_task_shade`
+        where id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator="," >
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByBaselineTaskId" resultType="com.dtstack.engine.po.BaselineTaskTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task_task_shade
+        where `baseline_task_id` = #{baselineTaskId} and `is_deleted` = 0
+    </select>
+
+    <select id="selectByBaselineTaskIds" resultType="com.dtstack.engine.po.BaselineTaskTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task_task_shade
+        where `baseline_task_id` IN
+        <foreach collection="baselineTaskIds" separator="," close=")" item="baselineTaskId" open="(">
+            #{baselineTaskId}
+        </foreach>
+        and `is_deleted` = 0
+    </select>
+
+    <select id="selectByTaskIds" resultType="java.lang.Long">
+        select
+        `baseline_task_id`
+        from baseline_task_task_shade
+        where `is_deleted` = 0
+        AND `task_id` IN
+        <foreach collection="taskIds" open="(" close=")" item="taskId" separator=",">
+            #{taskId}
+        </foreach>
+        AND `task_app_type` = #{appType}
+    </select>
+
+    <select id="selectAllByTaskIds" resultType="com.dtstack.engine.po.BaselineTaskTask">
+        select
+        <include refid="Base_Column_List" />
+        from baseline_task_task_shade
+        where `is_deleted` = 0
+        AND `task_id` IN
+        <foreach collection="taskIds" open="(" close=")" item="taskId" separator=",">
+            #{taskId}
+        </foreach>
+        AND `task_app_type` = #{appType}
+    </select>
+
+</mapper>

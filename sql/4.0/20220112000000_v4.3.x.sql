@@ -1,0 +1,1 @@
+ALTER  TABLE alert_record MODIFY `failure_reason` longtext COMMENT '当alert_send_status状态是2时，才会有值';

@@ -1,0 +1,1 @@
+alter table alert_record modify title varchar(255) default '' not null comment '标题';

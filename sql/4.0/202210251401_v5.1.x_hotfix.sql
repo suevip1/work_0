@@ -1,0 +1,1 @@
+alter table `alert_content` modify column `content` longtext;

@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleJobExpandDao">
+
+    <sql id="filed">
+        `id`,
+        `job_id`,
+        `retry_task_params`,
+        `job_extra_info`,
+        `engine_log`,
+        `log_info`,
+        `gmt_create`,
+        `gmt_modified`,
+        `is_deleted`,
+        `run_num`,
+        `status`,
+        `exec_start_time`,
+        `exec_end_time`,
+        `exec_time`,
+        `application_id`,
+        `engine_job_id`,
+        `enable_job_monitor`,
+        `auth_id`
+    </sql>
+    <insert id="insert">
+        INSERT INTO schedule_job_expand
+        (`job_id`,`retry_task_params`,`job_extra_info`,`engine_log`,`log_info`)
+        VALUES
+        (#{scheduleJobExpand.jobId},
+        #{scheduleJobExpand.retryTaskParams},
+        #{scheduleJobExpand.jobExtraInfo},
+        #{scheduleJobExpand.engineLog},
+        #{scheduleJobExpand.logInfo})
+    </insert>
+    <insert id="batchInsert">
+        INSERT INTO schedule_job_expand
+        (`job_id`,`retry_task_params`,`job_extra_info`,`engine_log`,`log_info`)
+        VALUES
+        <foreach collection="expands" item="scheduleJobExpand" separator=",">
+            (#{scheduleJobExpand.jobId},
+            #{scheduleJobExpand.retryTaskParams},
+            #{scheduleJobExpand.jobExtraInfo},
+            #{scheduleJobExpand.engineLog},
+            #{scheduleJobExpand.logInfo})
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertIgnore">
+        INSERT INTO schedule_job_expand
+        (`job_id`,`retry_task_params`,`job_extra_info`,`engine_log`,`log_info`,`run_num`)
+        VALUES
+        <foreach collection="expands" item="scheduleJobExpand" separator=",">
+            (#{scheduleJobExpand.jobId},
+            #{scheduleJobExpand.retryTaskParams},
+            #{scheduleJobExpand.jobExtraInfo},
+            #{scheduleJobExpand.engineLog},
+            #{scheduleJobExpand.logInfo},
+            #{scheduleJobExpand.runNum})
+        </foreach>
+    </insert>
+
+    <select id="getLogInfoByJobId" resultType="java.lang.String">
+        SELECT
+            `log_info`
+        FROM
+        schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        AND  `is_deleted` = 0
+        ORDER BY run_num desc
+        LIMIT 1
+    </select>
+
+    <update id="updateLogInfoByJobId">
+        UPDATE schedule_job_expand SET
+        <if test="logInfo!=null">
+            `log_info` = #{logInfo} ,
+        </if>
+        <if test="status!=null">
+            status = #{status},
+        </if>
+        `gmt_modified` = NOW()
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateLogInfoAndTimeByJobId">
+        UPDATE schedule_job_expand SET
+        <if test="logInfo!=null">
+            `log_info` = #{logInfo} ,
+        </if>
+        <if test="status!=null">
+            status = #{status},
+        </if>
+        exec_start_time = IFNULL(exec_start_time,now()), exec_end_time=now(), exec_time=timestampdiff(SECOND, exec_start_time, now()),
+        `gmt_modified` = NOW()
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateJobExpandByJobId">
+        UPDATE schedule_job_expand SET
+        `log_info` = #{logInfo} ,
+        <if test="status!=null">
+            status = #{status},
+        </if>
+        <if test="execStartTime != null">
+            exec_start_time = #{execStartTime},
+        </if>
+        <if test="execEndTime != null">
+            exec_end_time = #{execEndTime},
+        </if>
+        `gmt_modified` = NOW()
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateLogInfoByJobIds">
+        UPDATE schedule_job_expand SET
+        `log_info` = #{logInfo} ,
+        `gmt_modified` = NOW()
+        WHERE
+        `job_id` IN
+        <foreach collection="jobIds" close=")" open="(" separator="," item="jobId">
+            #{jobId}
+        </foreach>
+    </update>
+
+    <select id="getLogByJobId" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        `id`,
+        `job_id`,
+        `log_info`,
+        `engine_log`,
+        `retry_task_params`
+        FROM schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </select>
+
+    <select id="getLogByJobIdAndNum" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        `job_id`
+        `log_info`,
+        `engine_log`,
+        `retry_task_params`
+        FROM schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        AND run_num = #{num}
+    </select>
+
+    <update id="updateLogByJobId">
+        UPDATE schedule_job_expand SET
+        `log_info` = #{logInfo} ,
+        `engine_log` = #{engineLog} ,
+        `retry_task_params` = #{retryTaskParams}  ,
+        <if test="engineId!=null">
+            engine_job_id=#{engineId},
+        </if>
+       <if test="appId!=null">
+           application_id=#{appId},
+       </if>
+        `gmt_modified` = NOW()
+        WHERE
+        `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateJobSubmitSuccess">
+        UPDATE schedule_job_expand SET
+            engine_job_id=#{engineId},
+            application_id=#{appId},
+            `gmt_modified` = NOW()
+        WHERE
+        `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <select id="getLogByJobIds" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT `job_id`,`log_info`,`engine_log`,`run_num` FROM schedule_job_expand WHERE `job_id` IN
+        <foreach collection="jobIds" close=")" open="(" separator="," item="jobId">
+            #{jobId}
+        </foreach>
+        and `is_deleted` = 0
+    </select>
+
+    <select id="getJobExtraInfo" resultType="java.lang.String">
+        SELECT `job_extra_info`
+        FROM schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        AND `is_deleted` = 0
+        ORDER BY run_num desc
+        LIMIT 1
+    </select>
+
+    <select id="getJobExtraInfoById" resultType="java.lang.String">
+        SELECT `job_extra_info`
+        FROM schedule_job_expand
+        WHERE `id` = #{expendId}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="getRunSqlText" resultType="java.lang.String">
+        SELECT `run_sql_text`
+        FROM schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        AND run_num = #{runNum}
+    </select>
+
+    <select id="getExpandByJobIds" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        <include refid="filed"/>
+        FROM schedule_job_expand
+        WHERE `job_id` IN
+        <foreach collection="jobIds" close=")" open="(" separator="," item="jobId">
+            #{jobId}
+        </foreach>
+        and `is_deleted` = 0
+    </select>
+
+    <select id="getExpandByJobId" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        <include refid="filed"/>
+        FROM schedule_job_expand
+        WHERE `job_id`  = #{jobId}
+        AND `is_deleted` = 0
+        ORDER BY run_num desc
+        LIMIT 1
+    </select>
+
+    <update id="updateExtraInfo">
+        UPDATE schedule_job_expand
+        SET `job_extra_info` = #{jobExtraInfo} , `gmt_modified` = NOW()
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateExtraInfoAndLog">
+        UPDATE schedule_job_expand SET
+        `gmt_modified` = NOW(),
+        `exec_start_time` = NOW()
+        <if test="jobExtraInfo!=null and jobExtraInfo!=''">
+            , `job_extra_info` = #{jobExtraInfo}
+        </if>
+        <if test="engineLog!=null and engineLog!=''">
+            , `engine_log` = #{engineLog}
+        </if>
+        <if test="logInfo!=null and logInfo!=''">
+            , `log_info` = #{logInfo}
+        </if>
+        <if test="runSqlText!=null and runSqlText!=''">
+            , `run_sql_text` = #{runSqlText}
+        </if>
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+
+
+    <update id="updateEngineLog">
+        UPDATE schedule_job_expand SET `engine_log` = #{engineLog} , `gmt_modified` = NOW()  WHERE `job_id` = #{jobId} order by run_num desc limit 1
+    </update>
+
+    <update id="updateRunSubTaskIdByJobId">
+        UPDATE schedule_job_expand SET `run_sub_task_id` = #{runSubTaskId} , `gmt_modified` = NOW()  WHERE `job_id` = #{jobId}
+    </update>
+
+    <select id="getRunSubTaskIdByJobId" resultType="java.lang.String">
+        SELECT `run_sub_task_id`
+        FROM schedule_job_expand
+        WHERE `job_id` = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </select>
+
+    <select id="getSimplifyExpandByJobId" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+            `id`,
+            `job_id`,
+            `run_num`,
+            `status`,
+            `exec_start_time`,
+            `exec_end_time`,
+            `exec_time`,
+            `application_id`,
+            `engine_job_id`,
+            `enable_job_monitor`
+        FROM schedule_job_expand
+        WHERE job_id = #{jobId} and is_deleted = 0
+        ORDER BY run_num desc
+        <if test="limit!=null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <select id="getSimplifyExpandByJobIds" resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        `id`,
+        `job_id`,
+        `run_num`,
+        `status`,
+        `exec_start_time`,
+        `exec_end_time`,
+        `exec_time`,
+        `application_id`,
+        `engine_job_id`
+        FROM schedule_job_expand
+        WHERE `job_id` IN
+        <foreach collection="jobIds" close=")" open="(" separator="," item="jobId">
+            #{jobId}
+        </foreach>
+        and is_deleted = 0
+    </select>
+
+    <select id="getExpandByJobIdByNum"
+            resultType="com.dtstack.engine.po.ScheduleJobExpand">
+        SELECT
+        <include refid="filed"/>
+        FROM schedule_job_expand
+        WHERE `job_id`  = #{jobId}
+        AND `is_deleted` = 0
+        AND run_num = #{num}
+    </select>
+
+    <update id="clearLog">
+        UPDATE schedule_job_expand SET `log_info` = '' , `engine_log` = '' , `gmt_modified` = NOW()  WHERE
+        `job_id` IN
+        <foreach collection="jobIds" close=")" open="(" separator="," item="jobId">
+            #{jobId}
+        </foreach>
+    </update>
+
+    <update id="updateJobStatusAndExecTime">
+        UPDATE schedule_job_expand
+        SET
+            gmt_modified=now(),
+            exec_end_time=now(),
+            status=#{status},
+            exec_time=timestampdiff(SECOND, exec_start_time, now())
+        WHERE job_id=#{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateTaskStatusNotStopped">
+        update schedule_job_expand set gmt_modified=now(),status=#{status} where job_id=#{jobId} and status not in
+        <foreach item="stopStatus" index="index" collection="stoppedStatus" open="(" separator="," close=")">
+            #{stopStatus}
+        </foreach>
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+    <update id="updateJobStatus">
+        UPDATE schedule_job_expand
+        SET
+        gmt_modified=now(),
+        status=#{status}
+        WHERE job_id=#{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="setEnableJobMonitor">
+        UPDATE schedule_job_expand
+        SET
+            gmt_modified=now(),
+            enable_job_monitor=1
+        WHERE job_id=#{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <update id="updateJobDiagnosisInfo">
+        UPDATE schedule_job_expand
+        SET
+            gmt_modified=now(),
+            diagnosis_info=#{diagnosisInfo}
+        WHERE job_id=#{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+    <update id="updateJobCoreAndMem">
+        UPDATE
+            schedule_job_expand
+        SET
+            gmt_modified       = now(),
+            job_extra_info     = JSON_MERGE_PRESERVE(job_extra_info, '{ "coreNum": ${coreNum}, "memNum": ${memNum}}'),
+        enable_job_monitor = 1
+        WHERE job_id=#{jobId} AND run_num = #{runNum}
+    </update>
+
+    <select id="getJobDiagnosisInfo" resultType="java.lang.String">
+        SELECT
+        diagnosis_info
+        FROM schedule_job_expand
+        WHERE job_id = #{jobId}
+        and is_deleted = 0
+        and run_num = #{runNum}
+    </select>
+
+    <update id="updateAuthId">
+        UPDATE schedule_job_expand
+        SET gmt_modified=now(),
+            auth_id=#{authId}
+        WHERE job_id = #{jobId}
+        ORDER BY run_num desc
+        LIMIT 1
+    </update>
+
+    <select id="getAuthId" resultType="java.lang.Long">
+        SELECT
+        auth_id
+        FROM schedule_job_expand
+        WHERE job_id = #{jobId}
+        and is_deleted = 0
+        and run_num = #{runNum}
+    </select>
+
+</mapper>

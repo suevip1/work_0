@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ResourceGroupGrantDao">
+    <sql id="select_content_fragment">
+        id,resource_id, engine_project_id,project_id,app_type,dtuic_tenant_id,is_project_default,gmt_create,gmt_modified,is_deleted
+    </sql>
+
+    <select id="generalQuery" resultType="com.dtstack.engine.dto.GrantedProjectDTO">
+        SELECT
+        project_id,app_type,dtuic_tenant_id as tenantId,engine_project_id
+        FROM console_resource_group_grant
+        WHERE resource_id = #{model.resourceId} and is_deleted = 0 and project_id > 0
+        <if test="model.appType != null">
+           AND app_type = #{model.appType}
+        </if>
+        <if test="model.projectIds != null and model.projectIds.size() > 0">
+            AND project_id IN
+            <foreach item="project" index="index" collection="model.projectIds" open="(" separator="," close=")">
+                #{project}
+            </foreach>
+        </if>
+        <if test="model.userGroupIds != null and model.userGroupIds.size() > 0">
+            AND engine_project_id IN
+            <foreach item="groupId" index="index" collection="model.userGroupIds" open="(" separator="," close=")">
+                #{groupId}
+            </foreach>
+        </if>
+        <if test="model.dtuicTenantIds != null and model.dtuicTenantIds.size() > 0">
+            AND dtuic_tenant_id IN
+            <foreach item="tenantId" index="index" collection="model.dtuicTenantIds" open="(" separator="," close=")">
+                #{tenantId}
+            </foreach>
+        </if>
+        <if test="orderBy != null and sort != null">
+            order by ${orderBy} ${sort}
+        </if>
+        <if test="orderBy != null and sort == null">
+            order by ${orderBy} desc
+        </if>
+        <if test="start != null and pageSize != null">
+            limit #{start} , #{pageSize}
+        </if>
+        <if test="start == null and pageSize != null">
+            limit #{pageSize}
+        </if>
+        <if test="start == null and pageSize == null">
+            limit 1000
+        </if>
+    </select>
+
+    <select id="generalCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM console_resource_group_grant
+        WHERE resource_id = #{model.resourceId} AND is_deleted = 0 and project_id > 0
+        <if test="model.appType != null">
+           AND app_type = #{model.appType}
+        </if>
+        <if test="model.projectIds != null and model.projectIds.size() > 0">
+            AND project_id IN
+            <foreach item="project" index="index" collection="model.projectIds" open="(" separator="," close=")">
+                #{project}
+            </foreach>
+        </if>
+        <if test="model.dtuicTenantIds != null and model.dtuicTenantIds.size() > 0">
+            AND dtuic_tenant_id IN
+            <foreach item="tenantId" index="index" collection="model.dtuicTenantIds" open="(" separator="," close=")">
+                #{tenantId}
+            </foreach>
+        </if>
+        <if test="model.userGroupIds != null and model.userGroupIds.size() > 0">
+            AND engine_project_id IN
+            <foreach item="groupId" index="index" collection="model.userGroupIds" open="(" separator="," close=")">
+                #{groupId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="listAccessedResourceByProjectId" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT crg.id as resource_id, crg.name as resource_name
+        FROM console_resource_group_grant crgg
+                 inner join console_resource_group crg on crgg.resource_id = crg.id and crg.is_deleted = 0
+        WHERE crgg.project_id = #{projectId} and crgg.is_deleted = 0 and crgg.app_type = #{appType}
+         and crg.resource_type = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and crg.component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and crg.component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="listAccessedResourceGroups" resultType="com.dtstack.engine.po.ResourceGroup">
+        SELECT crg.id,crg.`name`,crg.description,crg.queue_path,crg.cluster_id,
+         crg.component_type_code,crg.gmt_create,crg.gmt_modified,crg.is_deleted
+        FROM console_resource_group_grant crgg
+         inner join console_resource_group crg on crgg.resource_id = crg.id and crg.is_deleted = 0
+        WHERE crgg.project_id = #{projectId} and crgg.is_deleted = 0 and crgg.app_type = #{appType}
+        <choose>
+            <when test="componentTypeCode != null">
+                and crg.component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and crg.component_type_code is null
+            </otherwise>
+        </choose>
+        and crg.resource_type = 0
+    </select>
+
+    <select id="listAccessedResourceDetailByProjectId" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT crg.id          as resource_id,
+               crg.name        as resource_name,
+               crg.description as description,
+               crg.cluster_id   as cluster_id,
+               crg.queue_path  as queue_path,
+               crgg.is_project_default,
+               crgg.id as resource_grant_id,
+               crgg.project_id
+        FROM console_resource_group_grant crgg
+                 left join console_resource_group crg
+                           on crgg.resource_id = crg.id
+        WHERE crgg.project_id = #{projectId} and crgg.app_type = #{appType}
+          and crgg.is_deleted = 0 and crg.is_deleted = 0 and crg.resource_type = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and crg.component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and crg.component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="countAccessedResourceByProjectId" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM console_resource_group_grant crgg inner join console_resource_group crg
+                                                          on crgg.resource_id = crg.id and crg.is_deleted = 0
+        WHERE crgg.project_id = #{projectId} and crgg.is_deleted = 0 and crgg.app_type = #{appType} and crg.resource_type = 0
+        <choose>
+            <when test="componentTypeCode != null">
+                and component_type_code = #{componentTypeCode}
+            </when>
+            <otherwise>
+                and component_type_code is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="listGrantedProjects" resultType="java.lang.Long">
+        SELECT project_id from console_resource_group_grant
+        WHERE resource_id = #{resourceId} and is_deleted = 0 and app_type = #{appType}
+    </select>
+
+    <select id="countByResourceIdAndEngineProjectId" resultType="java.lang.Long">
+        select count(1)
+        from console_resource_group_grant
+        where resource_id = #{resourceId} and project_id = #{projectId} and is_deleted = 0 and app_type = #{appType}
+    </select>
+
+    <insert id="insert" parameterType="com.dtstack.engine.po.ResourceGroupGrant" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO console_resource_group_grant(resource_id,project_id,gmt_create,gmt_modified,is_deleted,app_type,dtuic_tenant_id)
+        VALUES (#{resourceId},#{projectId},#{gmtCreate},#{gmtModified},#{isDeleted},#{appType},#{dtuicTenantId})
+    </insert>
+
+    <insert id="insertAll" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO console_resource_group_grant(resource_id,project_id,gmt_create,gmt_modified,is_deleted,app_type,dtuic_tenant_id,engine_project_id)
+        VALUES
+        <foreach collection="grants" item="grant" separator=",">
+               (#{grant.resourceId},#{grant.projectId},#{grant.gmtCreate},#{grant.gmtModified},#{grant.isDeleted},#{grant.appType},#{grant.dtuicTenantId}
+            ,#{grant.engineProjectId})
+        </foreach>
+    </insert>
+
+    <update id="delete">
+        update console_resource_group_grant set is_deleted = 1
+        where resource_id = #{resourceId} and project_id = #{projectId} and app_type = #{appType}
+    </update>
+
+    <update id="updateByResourceIdAndGroupId">
+        update console_resource_group_grant
+        set resource_id = #{resourceId}
+        where  engine_project_id = #{groupId} and is_deleted = 0
+        and resource_id = #{oldResourceId}
+    </update>
+
+
+    <update id="removeTenantId">
+        update console_resource_group_grant set is_deleted = 1
+        where dtuic_tenant_id = #{dtuicTenantId}
+    </update>
+
+    <update id="removeByProject">
+        update console_resource_group_grant set is_deleted = 1
+         where project_id = #{projectId} and app_type = #{appType}
+    </update>
+
+    <select id="getById" resultType="com.dtstack.engine.po.ResourceGroupGrant">
+        select <include refid="select_content_fragment"/>
+         from console_resource_group_grant where id = #{id} and is_deleted = 0
+    </select>
+
+    <update id="changeProjectDefault">
+        update console_resource_group_grant set is_project_default = #{targetDefault}, gmt_modified = now()
+         where id = #{id}
+    </update>
+
+    <update id="revertProjectDefault">
+        update console_resource_group_grant set is_project_default = 0, gmt_modified = now()
+          where id in
+        <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="listByResourceIdAndAppType" resultType="com.dtstack.engine.po.ResourceGroupGrant">
+        select <include refid="select_content_fragment"/>
+         from console_resource_group_grant where app_type = #{appType} and is_deleted = 0
+          and resource_id in
+            <foreach item="resourceId" index="index" collection="resourceIds" open="(" separator="," close=")">
+                #{resourceId}
+            </foreach>
+    </select>
+
+    <select id="generalLabelQuery" resultType="com.dtstack.engine.dto.LabelGrantedProjectDTO">
+        SELECT
+            dtuic_tenant_id as tenantId,
+            app_type,
+            project_id,
+            group_concat(resource_id order by resource_id) as concatResourceIds
+        FROM console_resource_group_grant
+        WHERE is_deleted = 0
+         and resource_id in
+        <foreach index="index" item="resourceIdItem" collection="model.resourceIds" open="(" separator="," close=")">
+            #{resourceIdItem}
+        </foreach>
+        <if test="model.appType != null">
+            AND app_type = #{model.appType}
+        </if>
+        <if test="model.projectIds != null and model.projectIds.size() > 0">
+            AND project_id IN
+            <foreach item="project" index="index" collection="model.projectIds" open="(" separator="," close=")">
+                #{project}
+            </foreach>
+        </if>
+        <if test="model.dtuicTenantIds != null and model.dtuicTenantIds.size() > 0">
+            AND dtuic_tenant_id IN
+            <foreach item="tenantId" index="index" collection="model.dtuicTenantIds" open="(" separator="," close=")">
+                #{tenantId}
+            </foreach>
+        </if>
+        group by dtuic_tenant_id, app_type, project_id
+        order by dtuic_tenant_id, app_type, project_id
+        <if test="start != null and pageSize != null">
+            limit #{start} , #{pageSize}
+        </if>
+        <if test="start == null and pageSize != null">
+            limit #{pageSize}
+        </if>
+        <if test="start == null and pageSize == null">
+            limit 1000
+        </if>
+    </select>
+
+    <select id="generalLabelCount" resultType="int">
+        select count(*) from (
+            SELECT
+                dtuic_tenant_id AS tenantId,
+                app_type,
+                project_id
+            FROM console_resource_group_grant
+            WHERE is_deleted = 0
+            AND resource_id IN
+            <foreach index="index" item="resourceIdItem" collection="model.resourceIds" open="(" separator="," close=")">
+                #{resourceIdItem}
+            </foreach>
+            <if test="model.appType != null">
+                AND app_type = #{model.appType}
+            </if>
+            <if test="model.projectIds != null and model.projectIds.size() > 0">
+                AND project_id IN
+                <foreach item="project" index="index" collection="model.projectIds" open="(" separator="," close=")">
+                    #{project}
+                </foreach>
+            </if>
+            <if test="model.dtuicTenantIds != null and model.dtuicTenantIds.size() > 0">
+                AND dtuic_tenant_id IN
+                <foreach item="tenantId" index="index" collection="model.dtuicTenantIds" open="(" separator="," close=")">
+                    #{tenantId}
+                </foreach>
+            </if>
+            GROUP BY dtuic_tenant_id, app_type, project_id
+        ) t
+    </select>
+
+    <select id="listDistinctProjectsByResourceIdAndAppType" resultType="com.dtstack.engine.po.ResourceGroupGrant">
+        select distinct dtuic_tenant_id, app_type, project_id
+         from console_resource_group_grant where app_type = #{appType} and is_deleted = 0
+        and resource_id in
+        <foreach item="resourceId" index="index" collection="resourceIds" open="(" separator="," close=")">
+            #{resourceId}
+        </foreach>
+    </select>
+
+    <select id="findAccessedResourceDetail" resultType="com.dtstack.engine.po.ResourceGroupDetail">
+        SELECT crg.id          as resource_id,
+            crg.name        as resource_name,
+            crg.description as description,
+            crg.cluster_id   as cluster_id,
+            crg.queue_path  as queue_path,
+            crgg.is_project_default,
+            crgg.id as resource_grant_id,
+            crgg.project_id
+        FROM console_resource_group_grant crgg
+         left join console_resource_group crg
+        on crgg.resource_id = crg.id
+         WHERE crgg.project_id = #{model.projectId} and crgg.app_type = #{model.appType}
+        and crgg.is_deleted = 0 and crg.is_deleted = 0
+        and crg.name = #{model.label} and crg.queue_path = #{model.userName}
+        <choose>
+            <when test="model.componentTypeCode != null">
+                and crg.component_type_code = #{model.componentTypeCode}
+            </when>
+            <otherwise>
+                and crg.component_type_code is null
+            </otherwise>
+        </choose>
+        limit 1
+    </select>
+
+    <update id="removeByTenantIdAndResourceIds">
+        update console_resource_group_grant set is_deleted = 1
+         where dtuic_tenant_id = #{dtuicTenantId}
+          and resource_id in
+        <foreach item="resourceId" index="index" collection="resourceIds" open="(" separator="," close=")">
+            #{resourceId}
+        </foreach>
+    </update>
+
+    <select id="listAllTrinoResourceBindInfos" resultType="com.dtstack.engine.dto.GrantedProjectDTO">
+        SELECT
+        project_id,app_type,dtuic_tenant_id as tenantId,engine_project_id
+        FROM console_resource_group_grant
+        WHERE  is_deleted = 0 and engine_project_id >0
+        and dtuic_tenant_id = #{dtuicTenantId}
+
+    </select>
+
+    <select id="listTrinoResourceBindByGroupId" resultType="com.dtstack.engine.po.ResourceGroupGrant">
+        SELECT
+        project_id,app_type,dtuic_tenant_id as tenantId,engine_project_id,resource_id
+        FROM console_resource_group_grant
+        WHERE  is_deleted = 0
+        and engine_project_id = #{groupId}
+        and dtuic_tenant_id = #{dtuicTenantId}
+    </select>
+
+    <select id="fuzzyQueryByResourceName" resultType="com.dtstack.engine.dto.GrantedProjectDTO">
+
+        select
+        a.project_id,a.app_type,a.dtuic_tenant_id as tenantId,a.engine_project_id
+        from
+        console_resource_group_grant a
+        left join console_resource_group b
+        on a.resource_id = b.id
+        where b.name like concat(#{resourceName}, '%')
+        and b.is_deleted = 0 and b.resource_type = 1
+        and a.dtuic_tenant_id = #{dtuicTenantId} and a.is_deleted = 0
+        and b.component_type_code is null
+    </select>
+</mapper>

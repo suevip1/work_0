@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskRefShadeDao">
+
+    <sql id="select_content_fragment">
+        id,
+        tenant_id,
+        project_id,
+        app_type,
+        ref_app_type,
+        task_id,
+        ref_task_id,
+        task_key,
+        ref_task_key,
+        gmt_create,
+        gmt_modified,
+        is_deleted
+    </sql>
+
+    <insert id="insert" parameterType="com.dtstack.engine.api.domain.ScheduleTaskRefShade" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO schedule_task_ref_shade
+        (
+            tenant_id,
+            project_id,
+            app_type,
+            ref_app_type,
+            task_id,
+            ref_task_id,
+            task_key,
+            ref_task_key
+         )
+        VALUES
+        (
+            #{tenantId},
+            #{projectId},
+            #{appType},
+            #{refAppType},
+            #{taskId},
+            #{refTaskId},
+            #{taskKey},
+            #{refTaskKey}
+        )
+    </insert>
+
+
+    <delete id="deleteByTaskIdAndRefTaskIdAndAppType">
+        DELETE FROM schedule_task_ref_shade
+        WHERE task_id = #{taskId} AND ref_task_id = #{refTaskId} AND app_type = #{appType}
+    </delete>
+
+
+    <select id="listByTaskKeys" resultType="com.dtstack.engine.api.domain.ScheduleTaskRefShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_ref_shade
+        WHERE is_deleted = 0 AND
+        task_key IN
+        <foreach collection="taskKeys" separator="," close=")" open="(" item="taskKey" >
+            #{taskKey}
+        </foreach>
+    </select>
+
+
+    <select id="listByRefTaskKeys" resultType="com.dtstack.engine.api.domain.ScheduleTaskRefShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_ref_shade
+        WHERE is_deleted = 0 AND
+        ref_task_key IN
+        <foreach collection="taskKeys" separator="," close=")" open="(" item="taskKey" >
+            #{taskKey}
+        </foreach>
+    </select>
+
+
+
+    <select id="listRefTaskIdByTaskId" resultType="java.lang.Long">
+        SELECT ref_task_id
+        FROM schedule_task_ref_shade
+        WHERE task_id = #{taskId}
+        AND is_deleted = 0
+        <if test="appType != null">
+            AND app_type = #{appType}
+        </if>
+    </select>
+
+
+    <select id="listRefTaskByTaskIds" resultType="com.dtstack.engine.api.domain.ScheduleTaskRefShade">
+        SELECT
+        <include refid="select_content_fragment"/>
+        FROM schedule_task_ref_shade
+        WHERE is_deleted = 0
+        AND app_type = #{appType}
+        AND task_id IN
+        <foreach collection="taskIds" separator="," close=")" open="(" item="taskId" >
+            #{taskId}
+        </foreach>
+    </select>
+
+</mapper>

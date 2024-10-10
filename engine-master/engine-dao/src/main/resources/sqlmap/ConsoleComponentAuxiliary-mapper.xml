@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ConsoleComponentAuxiliaryDao">
+  <resultMap id="BaseResultMap" type="com.dtstack.engine.po.ConsoleComponentAuxiliary">
+    <!--@mbg.generated-->
+    <!--@Table console_component_auxiliary-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="cluster_id" jdbcType="BIGINT" property="clusterId" />
+    <result column="component_type_code" jdbcType="TINYINT" property="componentTypeCode" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="open" jdbcType="TINYINT" property="open" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, cluster_id, component_type_code, `type`, `open`, gmt_create, gmt_modified, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from console_component_auxiliary
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from console_component_auxiliary
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliary" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary (cluster_id, component_type_code, `type`, 
+      `open`, gmt_create, gmt_modified, 
+      is_deleted)
+    values (#{clusterId,jdbcType=BIGINT}, #{componentTypeCode,jdbcType=TINYINT}, #{type,jdbcType=VARCHAR}, 
+      #{open,jdbcType=TINYINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{isDeleted,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliary" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        cluster_id,
+      </if>
+      <if test="componentTypeCode != null">
+        component_type_code,
+      </if>
+      <if test="type != null and type != ''">
+        `type`,
+      </if>
+      <if test="open != null">
+        `open`,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="componentTypeCode != null">
+        #{componentTypeCode,jdbcType=TINYINT},
+      </if>
+      <if test="type != null and type != ''">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="open != null">
+        #{open,jdbcType=TINYINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliary">
+    <!--@mbg.generated-->
+    update console_component_auxiliary
+    <set>
+      <if test="clusterId != null">
+        cluster_id = #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="componentTypeCode != null">
+        component_type_code = #{componentTypeCode,jdbcType=TINYINT},
+      </if>
+      <if test="type != null and type != ''">
+        `type` = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="open != null">
+        `open` = #{open,jdbcType=TINYINT},
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dtstack.engine.po.ConsoleComponentAuxiliary">
+    <!--@mbg.generated-->
+    update console_component_auxiliary
+    set cluster_id = #{clusterId,jdbcType=BIGINT},
+      component_type_code = #{componentTypeCode,jdbcType=TINYINT},
+      `type` = #{type,jdbcType=VARCHAR},
+      `open` = #{open,jdbcType=TINYINT},
+      gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=TINYINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into console_component_auxiliary
+    (cluster_id, component_type_code, `type`, `open`, gmt_create, gmt_modified, is_deleted
+      )
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.clusterId,jdbcType=BIGINT}, #{item.componentTypeCode,jdbcType=TINYINT}, #{item.type,jdbcType=VARCHAR}, 
+        #{item.open,jdbcType=TINYINT}, #{item.gmtCreate,jdbcType=TIMESTAMP}, #{item.gmtModified,jdbcType=TIMESTAMP}, 
+        #{item.isDeleted,jdbcType=TINYINT})
+    </foreach>
+  </insert>
+
+  <select id="queryByClusterAndComponentAndType" resultMap="BaseResultMap">
+    select
+     <include refid="Base_Column_List" />
+    from console_component_auxiliary
+    where cluster_id = #{clusterId}
+     and component_type_code = #{componentTypeCode}
+  </select>
+
+  <select id="queryByClusterAndComponentCodeAndType" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from console_component_auxiliary
+    where `cluster_id` = #{clusterId}
+    and `component_type_code` = #{componentTypeCode}
+    <if test="types != null and types.size > 0">
+      and `type` in
+      <foreach item="type" index="index" collection="types" open="(" separator="," close=")">
+        #{type}
+      </foreach>
+    </if>
+  </select>
+
+  <update id="switchAuxiliary">
+    update console_component_auxiliary set open = #{aSwitch}
+     where cluster_id = #{clusterId}
+      and component_type_code = #{componentTypeCode}
+      and `type` = #{type,jdbcType=VARCHAR}
+  </update>
+
+  <select id="queryByClusterAndComponentAndTypeAndSwitch" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from console_component_auxiliary
+    where cluster_id = #{clusterId}
+     and component_type_code = #{componentTypeCode}
+     and open = #{aSwitch}
+    <if test="type != null">
+      and `type` = #{type}
+    </if> limit 1
+  </select>
+
+  <delete id="removeByClusterAndComponentAndType">
+    delete
+    from console_component_auxiliary where cluster_id = #{clusterId}
+     and component_type_code = #{componentTypeCode}
+    <if test="type != null">
+      and `type` = #{type}
+    </if>
+  </delete>
+</mapper>

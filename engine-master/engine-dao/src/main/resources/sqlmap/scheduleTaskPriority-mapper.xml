@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dtstack.engine.dao.ScheduleTaskPriorityDao">
+
+    <sql id="select_content_fragment">
+        `id`,`app_type`,`task_id`,`baseline_task_id`,`priority`,`gmt_create`,`gmt_modified`,`is_deleted`
+    </sql>
+
+    <insert id="insertBatch">
+        insert into schedule_task_priority ( `app_type`, `task_id`,  `baseline_task_id`, `priority`,  `is_deleted`)
+        values
+        <foreach collection="scheduleTaskPriorityList" separator="," item="scheduleTaskPriority">
+            (
+            #{scheduleTaskPriority.appType},
+            #{scheduleTaskPriority.taskId},
+            #{scheduleTaskPriority.baselineTaskId},
+            #{scheduleTaskPriority.priority},
+            #{scheduleTaskPriority.isDeleted}
+            )
+        </foreach>
+    </insert>
+
+    <update id="clearPriority">
+        UPDATE schedule_task_priority SET `is_deleted` = 1 WHERE
+        `is_deleted` = 0
+        <if test="baselineTaskId!=null">
+            AND `baseline_task_id` = #{baselineTaskId}
+        </if>
+    </update>
+
+    <select id="selectByTaskId" resultType="java.lang.Integer">
+        SELECT `priority`
+        FROM `schedule_task_priority`
+        WHERE `task_id` = #{taskId}
+        AND `app_type` = #{appType}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="selectPriorityByTaskIds" resultType="com.dtstack.engine.po.ScheduleTaskPriority">
+        SELECT <include refid="select_content_fragment"/>
+        FROM `schedule_task_priority`
+        WHERE `task_id` IN
+        <foreach collection="taskIds" open="(" close=")" separator="," item="taskId">
+            #{taskId}
+        </foreach>
+        AND `app_type` = #{appType}
+        AND `is_deleted` = 0
+    </select>
+
+    <select id="selectTaskByPriorities" resultType="java.lang.Long">
+        SELECT task_id
+        FROM (
+            SELECT task_id,app_type,MAX(priority) max_priority
+            FROM schedule_task_priority WHERE `is_deleted` = 0
+            GROUP by task_id,app_type
+        ) tmp
+        WHERE
+        max_priority IN
+        <foreach collection="priorityList" separator="," item="priority" close=")" open="(" >
+            #{priority}
+        </foreach>
+    </select>
+
+
+</mapper>
